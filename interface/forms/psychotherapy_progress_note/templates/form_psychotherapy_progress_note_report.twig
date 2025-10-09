@@ -1,0 +1,118 @@
+<div class="oe-form oe-custom-form container-fluid">
+
+  <!-- ======================== -->
+  <!-- oe-custom-form style block -->
+  <!-- ======================== -->
+  <style>
+    /* Make labels and section headers adapt to the theme color */
+    .oe-custom-form label.form-label,
+    .oe-custom-form .form-section-header {
+        color: var(--text-color, #fff); 
+    }
+
+    /* Center all headers */
+    .oe-custom-form .form-section-header {
+        text-align: center;
+    }
+  </style>
+
+  <div class="page-header">
+      <h1>Psychotherapy Progress Note</h1>
+  </div>
+
+  <!-- ======================== -->
+  <!-- General Block -->
+  <!-- ======================== -->
+  <h3 class="form-section-header">General</h3>
+  <p><strong>Subjective:</strong> <span class="form-control-static">{{ form.subjective|default('N/A') }}</span></p>
+  <p><strong>Objective:</strong> <span class="form-control-static">{{ form.objective|default('N/A') }}</span></p>
+
+  <!-- ======================== -->
+  <!-- Mental Status Exam Report -->
+  <!-- ======================== -->
+  <h3 class="form-section-header">Mental Status Exam</h3>
+
+  {% set mental_status_fields = [
+    'orientation','attention','appearance','behavior','speech',
+    'affect','mood','thought_process','thought_content','judgment','insight'
+  ] %}
+
+  {% for field in mental_status_fields %}
+    <p><strong>{{ field|replace({'_':' '})|capitalize }}:</strong>
+    {% set selected = attribute(form, field)|default([]) %}
+    {{ selected|join(', ') }}</p>
+  {% endfor %}
+
+  <!-- ======================== -->
+  <!-- Risk Assessment Report   -->
+  <!-- ======================== -->
+  <h3 class="form-section-header">Risk Assessment</h3>
+
+  {% if form.denies_all_risk == 1 %}
+    <p>Denies All Risk</p>
+  {% else %}
+    <p><strong>Suicide Risk Level:</strong>
+      {% if form.suicide_level is iterable %}
+        {{ form.suicide_level|join(', ') }}
+      {% else %}
+        {{ form.suicide_level }}
+      {% endif %}
+    </p>
+
+    <p><strong>Homicide Risk Level:</strong>
+      {% if form.homicide_level is iterable %}
+        {{ form.homicide_level|join(', ') }}
+      {% else %}
+        {{ form.homicide_level }}
+      {% endif %}
+    </p>
+
+    <p><strong>Self-Harm Risk Level:</strong>
+      {% if form.selfharm_level is iterable %}
+        {{ form.selfharm_level|join(', ') }}
+      {% else %}
+        {{ form.selfharm_level }}
+      {% endif %}
+    </p>
+
+    <p><strong>Additional Relevant Information:</strong> {{ form.risk_info }}</p>
+  {% endif %}
+
+  <p><strong>Overall Risk:</strong> {{ form.overall_risk }}</p>
+
+  <!-- ======================== -->
+  <!-- Assessment Block -->
+  <!-- ======================== -->
+  <h3 class="form-section-header">Assessment</h3>
+  {% set assessment_fields = [
+    'clinical_summary','diagnostic_support','assessment_symptoms','medical_necessity','therapeutic_interventions'
+  ] %}
+  {% for field in assessment_fields %}
+    <p><strong>{{ field|replace({'_':' '})|capitalize }}:</strong> <span class="form-control-static">{{ attribute(form, field)|default('N/A') }}</span></p>
+  {% endfor %}
+
+  <!-- ======================== -->
+  <!-- Progress Towards Goals Block -->
+  <!-- ======================== -->
+  <h3 class="form-section-header">Progress Towards Goals</h3>
+  <p><strong>Description of treatment goals:</strong> <span class="form-control-static">{{ form.subjective|default('N/A') }}</span></p>
+  <p><strong>Level of progress towards goals:</strong> {{ form.goals_progress }}</p>
+  <p><strong>Barriers to achieving treatment goals:</strong>
+    {% if form.barriers is iterable %}
+      {{ form.barriers|join(', ') }}
+    {% else %}
+      {{ form.barriers }}
+    {% endif %}
+  </p>
+
+
+  <!-- ======================== -->
+  <!-- Plan Block -->
+  <!-- ======================== -->
+  <h3 class="form-section-header">Plan</h3>
+  {% set plan_fields = ['next_steps','next_appt_date','next_appt_time'] %}
+  {% for field in plan_fields %}
+    <p><strong>{{ field|replace({'_':' '})|capitalize }}:</strong> <span class="form-control-static">{{ attribute(form, field)|default('N/A') }}</span></p>
+  {% endfor %}
+
+</div>
