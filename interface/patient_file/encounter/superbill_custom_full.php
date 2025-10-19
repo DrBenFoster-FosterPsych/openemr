@@ -115,7 +115,7 @@ if (isset($mode) && $thisauthwrite) {
 
             if (!$alertmsg) {
                 foreach ($_POST['fee'] as $key => $value) {
-                    $value = $value ?? 0;
+                    $value ??= 0;
                     if ($value) {
                         sqlStatement("INSERT INTO prices ( " .
                             "pr_id, pr_selector, pr_level, pr_price ) VALUES ( " .
@@ -803,7 +803,7 @@ if ($fend > ($count ?? null)) {
             if (related_codes_are_used() && $iter['related_code']) {
                 // Show related codes.
                 echo "  <td class='text'>";
-                $arel = explode(';', $iter['related_code']);
+                $arel = explode(';', (string) $iter['related_code']);
                 foreach ($arel as $tmp) {
                     [$reltype, $relcode] = explode(':', $tmp);
                     $code_description = lookup_code_descriptions($reltype . ":" . $relcode);

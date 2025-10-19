@@ -178,13 +178,13 @@ if ($popup) {
     "ORDER BY group_id, seq");
     while ($frow = sqlFetchArray($fres)) {
         $field_id  = $frow['field_id'];
-        if (str_starts_with($field_id, 'em_')) {
+        if (str_starts_with((string) $field_id, 'em_')) {
             continue;
         }
 
         $data_type = $frow['data_type'];
         if (!empty($_REQUEST[$field_id])) {
-            $value = trim($_REQUEST[$field_id]);
+            $value = trim((string) $_REQUEST[$field_id]);
             if ($field_id == 'pid') {
                 $where .= " AND " . escape_sql_column_name($field_id, ['patient_data']) . " = ?";
                 array_push($sqlBindArray, $value);
@@ -226,11 +226,7 @@ if ($popup) {
     $sqlBindArray = array_merge($boundFilter->getBoundValues(), $sqlBindArray);
     $customWhere = $boundFilter->getFilterClause();
 
-    if (empty($where)) {
-        $where = $customWhere;
-    } else {
-        $where = "$customWhere AND $where";
-    }
+    $where = empty($where) ? $customWhere : "$customWhere AND $where";
 
     $sql = "SELECT $given FROM patient_data " .
     "WHERE $where ORDER BY $orderby LIMIT " . escape_limit($fstart) . ", " . escape_limit($sqllimit);

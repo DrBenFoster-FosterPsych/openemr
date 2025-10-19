@@ -97,11 +97,7 @@ function bookmarkReportDatabase()
 
   // Retrieve a new report id
     $query = sqlQuery("SELECT max(`report_id`) as max_report_id FROM `report_results`");
-    if (empty($query)) {
-        $new_report_id = 1;
-    } else {
-        $new_report_id = $query['max_report_id'] + 1;
-    }
+    $new_report_id = empty($query) ? 1 : $query['max_report_id'] + 1;
 
   // Set the bookmark token
     sqlStatement("INSERT INTO `report_results` (`report_id`,`field_id`,`field_value`) VALUES (?,?,?)", [$new_report_id,"bookmark",1]);
@@ -123,11 +119,7 @@ function beginReportDatabase($type, $fields, $report_id = null)
   // Retrieve a new report id, if needed.
     if (empty($report_id)) {
         $query = sqlQuery("SELECT max(`report_id`) as max_report_id FROM `report_results`");
-        if (empty($query)) {
-            $new_report_id = 1;
-        } else {
-            $new_report_id = $query['max_report_id'] + 1;
-        }
+        $new_report_id = empty($query) ? 1 : $query['max_report_id'] + 1;
     } else {
         $new_report_id = $report_id;
     }
@@ -295,7 +287,7 @@ function collectItemizedRuleDisplayTitle($report_id, $itemized_test_id, $numerat
     $dispTitle = "";
     $report_view = collectReportDatabase($report_id);
     $type_report = $report_view['type'];
-    $dataSheet = json_decode($report_view['data'], true);
+    $dataSheet = json_decode((string) $report_view['data'], true);
     $display_group_provider_info = false;
     $group_label = '';
     $group_provider_label = '';
@@ -313,11 +305,7 @@ function collectItemizedRuleDisplayTitle($report_id, $itemized_test_id, $numerat
             } else if (isset($row['is_provider'])) {
                 $provider_label = ' ' . xlt('Provider') . ': ' . text($row['prov_fname']) . ',' . text($row['prov_lname'])
                     . ' ( ' . xlt('NPI') . ' ' . text($row['npi']) . ' ) ';
-                if (isset($row['is_provider_in_group'])) {
-                    $group_provider_label = $group_label . ' ' . $provider_label;
-                } else {
-                    $group_provider_label = $provider_label;
-                }
+                $group_provider_label = isset($row['is_provider_in_group']) ? $group_label . ' ' . $provider_label : $provider_label;
             }
         }
 
@@ -487,12 +475,12 @@ function collectItemizedPatientsCdrReport($report_id, $itemized_test_id, $pass =
  */
 function formatReportData($report_id, &$data, $is_amc, $is_cqm, $type_report, $amc_report_types = [])
 {
-    $dataSheet = json_decode($data, true) ?? [];
+    $dataSheet = json_decode((string) $data, true) ?? [];
     $formatted = [];
     $main_pass_filter = 0;
     foreach ($dataSheet as $row) {
         $row['type'] = $type_report;
-        $row['total_patients'] = $row['total_patients'] ?? 0;
+        $row['total_patients'] ??= 0;
         $failed_items = null;
         $displayFieldSubHeader = "";
 
@@ -540,10 +528,10 @@ function formatReportData($report_id, &$data, $is_amc, $is_cqm, $type_report, $a
             $base_link = sprintf(
                 "../main/finder/patient_select.php?from_page=cdr_report&report_id=%d"
                 . "&itemized_test_id=%d&numerator_label=%s&csrf_token_form=%s",
-                urlencode($report_id),
-                urlencode($row['itemized_test_id']),
+                urlencode((string) $report_id),
+                urlencode((string) $row['itemized_test_id']),
                 urlencode($row['numerator_label'] ?? ''),
-                urlencode($csrf_token)
+                urlencode((string) $csrf_token)
             );
 
             // we need the provider & group id here...

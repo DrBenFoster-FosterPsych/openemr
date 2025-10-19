@@ -13,7 +13,7 @@ namespace OpenEMR\Services\Search;
 
 use OpenEMR\Common\Uuid\UuidRegistry;
 
-class TokenSearchValue
+class TokenSearchValue implements \Stringable
 {
     /**
      * @var string|int|float|boolean
@@ -42,7 +42,7 @@ class TokenSearchValue
     public static function buildFromFHIRString($codeSystemValue, $isUuid = false)
     {
         $code = $codeSystemValue;
-        $valueParts = explode("|", $codeSystemValue);
+        $valueParts = explode("|", (string) $codeSystemValue);
         if (count($valueParts) == 1) {
             $system = null;
         } else {
@@ -103,7 +103,7 @@ class TokenSearchValue
         }
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return ($this->getCode() ? $this->getHumanReadableCode() : "") . "|" . ($this->getSystem() ?: "");
     }

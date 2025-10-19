@@ -74,7 +74,7 @@ class ModuleService
         $flag = false;
         while ($row = sqlFetchArray($us)) {
             $flag = true;
-            $key = substr($row['setting_label'], 7);
+            $key = substr((string) $row['setting_label'], 7);
             $vendors[$key] = $row['setting_value'];
         }
         if (!$flag && !empty($_SESSION['authUserID'] ?? '')) {
@@ -150,7 +150,7 @@ class ModuleService
         $sql = "SELECT $col FROM modules WHERE mod_id = ? OR `mod_directory` = ?";
         $results = sqlQuery($sql, [$modId, $modId]);
         foreach ($results as $k => $v) {
-            $registry[$k] = trim((preg_replace('/\R/', '', $v)));
+            $registry[$k] = trim(((string) preg_replace('/\R/', '', (string) $v)));
         }
 
         return $registry;
@@ -232,7 +232,7 @@ class ModuleService
     public function getProviderName(): string
     {
         $provider_info = sqlQuery("select fname, mname, lname from users where username=? ", [$_SESSION["authUser"]]);
-        $provider_info = $provider_info ?? ['fname' => '', 'mname' => '', 'lname' => ''];
+        $provider_info ??= ['fname' => '', 'mname' => '', 'lname' => ''];
         return $provider_info['fname'] . " " . $provider_info['mname'] . " " . $provider_info['lname'];
     }
 }

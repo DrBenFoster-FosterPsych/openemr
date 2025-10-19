@@ -43,7 +43,7 @@ include_once __DIR__ . '/Savant3/Plugin.php';
  */
 
 #[\AllowDynamicProperties]
-class Savant3
+class Savant3 implements \Stringable
 {
     /**
      *
@@ -212,7 +212,7 @@ class Savant3
      * @return string The template output.
      *
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getOutput();
     }
@@ -277,11 +277,7 @@ class Savant3
 
             // get the default configuration for the plugin.
             $plugin_conf = & $this->__config ['plugin_conf'];
-            if (! empty($plugin_conf [$name])) {
-                $opts = $plugin_conf [$name];
-            } else {
-                $opts =  [];
-            }
+            $opts = ! empty($plugin_conf [$name]) ? $plugin_conf [$name] : [];
 
             // add the Savant reference
             $opts ['Savant'] = $this;
@@ -573,11 +569,7 @@ class Savant3
             // loop through the predefined callbacks.
             foreach ($this->__config ['escape'] as $func) {
                 // this if() shaves 0.001sec off of 300 calls.
-                if (is_string($func)) {
-                    $value = $func($value);
-                } else {
-                    $value = call_user_func($func, $value);
-                }
+                $value = is_string($func) ? $func($value) : call_user_func($func, $value);
             }
         } else {
             // yes, use the custom callbacks
@@ -589,11 +581,7 @@ class Savant3
             // loop through custom callbacks.
             foreach ($callbacks as $func) {
                 // this if() shaves 0.001sec off of 300 calls.
-                if (is_string($func)) {
-                    $value = $func($value);
-                } else {
-                    $value = call_user_func($func, $value);
-                }
+                $value = is_string($func) ? $func($value) : call_user_func($func, $value);
             }
         }
 
@@ -640,10 +628,7 @@ class Savant3
             echo $this->escape($value);
         } else {
             $args = func_get_args();
-            echo call_user_func_array([
-                    $this,
-                    'escape'
-            ], $args);
+            echo call_user_func_array($this->escape(...), $args);
         }
     }
 
@@ -724,7 +709,7 @@ class Savant3
         // loop through the path directories
         foreach ($path as $dir) {
             // no surrounding spaces allowed!
-            $dir = trim($dir);
+            $dir = trim((string) $dir);
 
             // add trailing separators as needed
             if (strpos($dir, '://') && !str_ends_with($dir, '/')) {
@@ -765,7 +750,7 @@ class Savant3
             $fullname = $path . $file;
 
             // is the path based on a stream?
-            if (!str_contains($path, '://')) {
+            if (!str_contains((string) $path, '://')) {
                 // not a stream, so do a realpath() to avoid
                 // directory traversal attempts on the local file
                 // system. Suggested by Ian Eure, initially
@@ -779,7 +764,7 @@ class Savant3
             // that the realpath() results in a directory registered
             // with Savant so that non-registered directores are not
             // accessible via directory traversal attempts.
-            if (file_exists($fullname) && is_readable($fullname) && str_starts_with($fullname, $path)) {
+            if (file_exists($fullname) && is_readable($fullname) && str_starts_with($fullname, (string) $path)) {
                 return $fullname;
             }
         }

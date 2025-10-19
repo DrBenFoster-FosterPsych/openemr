@@ -97,7 +97,7 @@ class Header
         $scriptName = $_SERVER['SCRIPT_NAME'];
 
         // we fire off events to grab any additional module scripts or css files that desire to adjust the currently executed script
-        $scriptFilterEvent = new ScriptFilterEvent(basename($scriptName));
+        $scriptFilterEvent = new ScriptFilterEvent(basename((string) $scriptName));
         $scriptFilterEvent->setContextArgument(ScriptFilterEvent::CONTEXT_ARGUMENT_SCRIPT_NAME, $scriptName);
         $apptScripts = $GLOBALS['kernel']->getEventDispatcher()->dispatch($scriptFilterEvent, ScriptFilterEvent::EVENT_NAME);
 
@@ -150,11 +150,7 @@ class Header
      */
     public static function setupAssets($assets = [], $headerMode = false, $echoOutput = true)
     {
-        if ($headerMode) {
-            self::$isHeader = true;
-        } else {
-            self::$isHeader = false;
-        }
+        self::$isHeader = $headerMode ? true : false;
 
         try {
             if ($echoOutput) {
@@ -307,11 +303,7 @@ class Header
                     throw new \InvalidArgumentException("Script must be of type string or object with src property");
                 }
                 $k['src'] = self::parsePlaceholders($k['src']);
-                if ($alreadyBuilt) {
-                    $path = $k['src'];
-                } else {
-                    $path = self::createFullPath($basePath, $k['src']);
-                }
+                $path = $alreadyBuilt ? $k['src'] : self::createFullPath($basePath, $k['src']);
                 unset($k['src']);
                 $scripts[] = self::createElement($path, 'script', $alreadyBuilt, $k);
             }
@@ -328,11 +320,7 @@ class Header
 
             foreach ($link as $l) {
                 $l = self::parsePlaceholders($l);
-                if ($alreadyBuilt) {
-                    $path = $l;
-                } else {
-                    $path = self::createFullPath($basePath, $l);
-                }
+                $path = $alreadyBuilt ? $l : self::createFullPath($basePath, $l);
                 $links[] = self::createElement($path, 'link', $alreadyBuilt);
             }
         }

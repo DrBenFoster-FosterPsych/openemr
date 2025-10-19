@@ -128,11 +128,7 @@ function getPnotesByUser($activity = "1", $show_all = "no", $user = '', $count =
 
   // return the results
     if ($count) {
-        if (sqlNumRows($result) != 0) {
-            $total = sqlNumRows($result);
-        } else {
-            $total = 0;
-        }
+        $total = sqlNumRows($result) != 0 ? sqlNumRows($result) : 0;
 
         return $total;
     } else {
@@ -591,7 +587,7 @@ function deletePnote($id)
 // Note that it is assumed that html escaping has happened before this function is called
 function pnoteConvertLinks($note)
 {
-    $noteActiveLink = preg_replace('!(https://[-a-zA-Z()0-9@:%_+.~#?&;//=]+)!i', '<a href="$1" target="_blank" rel="noopener">$1</a>', $note);
+    $noteActiveLink = preg_replace('!(https://[-a-zA-Z()0-9@:%_+.~#?&;//=]+)!i', '<a href="$1" target="_blank" rel="noopener">$1</a>', (string) $note);
     if (empty($noteActiveLink)) {
         // something bad happened (preg_replace returned null) or the $note was empty
         return $note;

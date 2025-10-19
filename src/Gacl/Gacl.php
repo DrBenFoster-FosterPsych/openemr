@@ -514,12 +514,7 @@ class Gacl {
 					';
 
 			// we are only interested in the first row unless $return_all is set
-                        if ($return_all) {
-                                $rs = $this->db->Execute($query);
-                        }
-                        else {
-			        $rs = $this->db->SelectLimit($query, 1);
-                        }
+                        $rs = $return_all ? $this->db->Execute($query) : $this->db->SelectLimit($query, 1);
 
 			if (!is_object($rs)) {
 				$this->debug_db('acl_query');
@@ -609,7 +604,7 @@ class Gacl {
 	*/
 	function acl_get_groups($section_value, $value, $root_group=NULL, $group_type='ARO') {
 
-		switch(strtolower($group_type)) {
+		switch(strtolower((string) $group_type)) {
 			case 'axo':
 				$group_type = 'axo';
 				$object_table = $this->_db_table_prefix .'axo';

@@ -318,6 +318,13 @@ class UtilsService
         );
     }
 
+    public static function createDataAbsentUnknownCode(): FHIRCode
+    {
+        $code = new FHIRCode();
+        $code->setValue(self::UNKNOWNABLE_CODE_NULL_FLAVOR);
+        return $code;
+    }
+
     /**
      * Given a FHIRPeriod object return an array containing the timestamp in milliseconds of the start and end points
      * of the period.  If the passed in object is null it will return null values for the 'start' and 'end' properties.
@@ -330,11 +337,15 @@ class UtilsService
         $end = null;
         $start = null;
         if ($period !== null) {
+            // FHIRPeriod start and end can be either a string or a FHIRDateTime object
+            // TODO: we should look at changing the method calls to use FHIRDateTime objects
             if (!empty($period->getEnd())) {
-                $end = strtotime($period->getEnd()->getValue());
+                $value = is_string($period->getEnd()) ? $period->getEnd() : $period->getEnd()->getValue();
+                $end = strtotime($value);
             }
             if (!empty($period->getStart())) {
-                $start = strtotime($period->getStart()->getValue());
+                $value = is_string($period->getStart()) ? $period->getStart() : $period->getStart()->getValue();
+                $start = strtotime($value);
             }
         }
         return [
@@ -432,11 +443,7 @@ class UtilsService
         $parts = parse_url($reference->getReference());
 
         // if all we have is a path then we skip the host check
-        if (isset($parts['host'])) {
-            $parsed_reference['localResource'] = $parts['host'] == $oauthHost;
-        } else {
-            $parsed_reference['localResource'] = true;
-        }
+        $parsed_reference['localResource'] = isset($parts['host']) ? $parts['host'] == $oauthHost : true;
         $splitParts = explode("/", $parts['path']);
         if (count($splitParts) >= 2) {
             $parsed_reference['uuid'] = array_pop($splitParts);

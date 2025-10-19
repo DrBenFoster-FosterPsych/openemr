@@ -191,7 +191,7 @@ if (isset($_POST["mode"])) {
                 $StringSessionId .= $rowrs['session_id'] . ',';
             }
 
-            $StringSessionId = substr($StringSessionId, 0, -1);
+            $StringSessionId = substr((string) $StringSessionId, 0, -1);
             if ($PaymentStatus == 'fully_paid') {
                 $QueryString .= " $And session_id in(" . add_escape_custom($StringSessionId) . ") ";
             } elseif ($PaymentStatus == 'unapplied') {
@@ -205,11 +205,7 @@ if (isset($_POST["mode"])) {
             $SortFieldOld = isset($_POST['SortFieldOld']) ? trim($_POST['SortFieldOld']) : '';
             $Sort = isset($_POST['Sort']) ? trim($_POST['Sort']) : '';
             if ($SortFieldOld == $PaymentSortBy) {
-                if ($Sort == 'DESC' || $Sort == '') {
-                    $Sort = 'ASC';
-                } else {
-                    $Sort = 'DESC';
-                }
+                $Sort = $Sort == 'DESC' || $Sort == '' ? 'ASC' : 'DESC';
             } else {
                 $Sort = 'ASC';
             }
@@ -506,11 +502,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                         }
                                         //=============================================
                                         $CountIndex++;
-                                        if ($CountIndex % 2 == 1) {
-                                            $bgcolor = '#ddddff';
-                                        } else {
-                                            $bgcolor = '#ffdddd';
-                                        }
+                                        $bgcolor = $CountIndex % 2 == 1 ? '#ddddff' : '#ffdddd';
                                         ?>
                                         <tr bgcolor='<?php echo attr($bgcolor); ?>' class="text">
                                             <td>
@@ -539,7 +531,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                                 ?></a>
                                             </td>
                                             <td>
-                                                <!--<a class='iframe medium_modal' href="edit_payment.php?payment_id=<?php echo htmlspecialchars($RowSearch['session_id']); ?>"><?php echo $Payer == '' ? '&nbsp;' : htmlspecialchars($Payer); ?></a>-->
+                                                <!--<a class='iframe medium_modal' href="edit_payment.php?payment_id=<?php echo htmlspecialchars((string) $RowSearch['session_id']); ?>"><?php echo $Payer == '' ? '&nbsp;' : htmlspecialchars((string) $Payer); ?></a>-->
                                                 <a class="medium_modal" href='edit_payment.php?payment_id=<?php echo attr_url($RowSearch['session_id']); ?>')"><?php echo $Payer == '' ? '&nbsp;' : text($Payer); ?></a><!--link to iframe-->
                                             </td>
                                             <td>

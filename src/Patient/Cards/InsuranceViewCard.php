@@ -80,11 +80,7 @@ class InsuranceViewCard extends CardModel
     private function getInsuranceTypeArray()
     {
         // TODO: @adunsulag should we move this into a class?  It's copied everywhere...
-        if ($GLOBALS['insurance_only_one']) {
-            $insurance_array = ['primary'];
-        } else {
-            $insurance_array = ['primary', 'secondary', 'tertiary'];
-        }
+        $insurance_array = $GLOBALS['insurance_only_one'] ? ['primary'] : ['primary', 'secondary', 'tertiary'];
         return $insurance_array;
     }
     private function getInsuranceData()
@@ -123,7 +119,7 @@ class InsuranceViewCard extends CardModel
             $icobj = new InsuranceCompany($row['provider']);
             $adobj = $icobj->get_address();
             $row['insco'] = [
-                'name' => trim($icobj->get_name()),
+                'name' => trim((string) $icobj->get_name()),
                 'display_name' => $icobj->get_display_name(),
                 'address' => [
                     'line1' => $adobj->get_line1(),

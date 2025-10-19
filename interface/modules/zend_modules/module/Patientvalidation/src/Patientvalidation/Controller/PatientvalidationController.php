@@ -45,15 +45,11 @@ class PatientvalidationController extends BaseController
     {
         //Collect all of the data received from the new patient form
         $patientParams = $this->getRequestedParamsArray();
-        if (isset($patientParams["closeBeforeOpening"])) {
-            $closeBeforeOpening = $patientParams["closeBeforeOpening"];
-        } else {
-            $closeBeforeOpening = '';
-        }
+        $closeBeforeOpening = $patientParams["closeBeforeOpening"] ?? '';
 
         //clean the mf_
         foreach ($patientParams as $key => $item) {
-                $keyArr = explode("mf_", $key);
+                $keyArr = explode("mf_", (string) $key);
                 $patientParams[$keyArr[1]] = $item;
                 unset($patientParams[$key]);
         }

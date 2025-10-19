@@ -90,11 +90,7 @@ class TwilioSMSClient extends AppDispatch
         $from = $from ?: $this->getRequest('from');
         $message = $message ?: $this->getRequest('comments');
 
-        if (empty($from)) {
-            $from = $this->formatPhone($this->credentials['smsNumber']);
-        } else {
-            $from = $this->formatPhone($from);
-        }
+        $from = empty($from) ? $this->formatPhone($this->credentials['smsNumber']) : $this->formatPhone($from);
         $toPhone = $this->formatPhone($toPhone);
         try {
             $twilio = new Client($this->appKey, $this->appSecret, $this->sid);
@@ -119,12 +115,8 @@ class TwilioSMSClient extends AppDispatch
     public function formatPhone($number): string
     {
         // this is u.s only. need E-164
-        $n = preg_replace('/[^0-9]/', '', $number);
-        if (stripos($n, '1') === 0) {
-            $n = '+' . $n;
-        } else {
-            $n = '+1' . $n;
-        }
+        $n = preg_replace('/[^0-9]/', '', (string) $number);
+        $n = stripos((string) $n, '1') === 0 ? '+' . $n : '+1' . $n;
         return $n;
     }
 
@@ -160,8 +152,8 @@ class TwilioSMSClient extends AppDispatch
             // dateFrom and dateTo
             $timeFrom = 'T00:00:01Z';
             $timeTo = 'T23:59:59Z';
-            $dateFrom = trim($dateFrom) . $timeFrom;
-            $dateTo = trim($dateTo) . $timeTo;
+            $dateFrom = trim((string) $dateFrom) . $timeFrom;
+            $dateTo = trim((string) $dateTo) . $timeTo;
 
             try {
                 $twilio = new Client($this->appKey, $this->appSecret, $this->sid);

@@ -590,7 +590,7 @@ class Document extends ORDataObject
     }
     function get_hash_algo_title()
     {
-        if (!empty($this->hash) && strlen($this->hash) < 50) {
+        if (!empty($this->hash) && strlen((string) $this->hash) < 50) {
             return "SHA1";
         } else {
             return "SHA3-512";
@@ -617,7 +617,7 @@ class Document extends ORDataObject
     */
     function get_url_filepath()
     {
-        return preg_replace("|^(.*)://|", "", $this->url);
+        return preg_replace("|^(.*)://|", "", (string) $this->url);
     }
 
     /**
@@ -639,7 +639,7 @@ class Document extends ORDataObject
         // etc.
         // NOTE that $from_filename and basename($url) are the same thing
         $filepath = $this->get_url_filepath();
-        $from_all = explode("/", $filepath);
+        $from_all = explode("/", (string) $filepath);
         $from_filename = array_pop($from_all);
         $from_pathname_array = [];
         for ($i = 0; $i < $this->get_path_depth(); $i++) {
@@ -655,14 +655,14 @@ class Document extends ORDataObject
     */
     function get_url_file()
     {
-        return basename_international(preg_replace("|^(.*)://|", "", $this->url));
+        return basename_international(preg_replace("|^(.*)://|", "", (string) $this->url));
     }
     /**
     * get the url path only
     */
     function get_url_path()
     {
-        return dirname(preg_replace("|^(.*)://|", "", $this->url)) . "/";
+        return dirname((string) preg_replace("|^(.*)://|", "", (string) $this->url)) . "/";
     }
     function get_path_depth()
     {
@@ -918,11 +918,7 @@ class Document extends ORDataObject
             $thumb_size = ($GLOBALS['thumb_doc_max_size'] > 0) ? $GLOBALS['thumb_doc_max_size'] : null;
             $thumbnail_class = new Thumbnail($thumb_size);
 
-            if (!is_null($tmpfile)) {
-                $has_thumbnail = $thumbnail_class->file_support_thumbnail($tmpfile);
-            } else {
-                $has_thumbnail = false;
-            }
+            $has_thumbnail = !is_null($tmpfile) ? $thumbnail_class->file_support_thumbnail($tmpfile) : false;
 
             if ($has_thumbnail) {
                 $thumbnail_resource = $thumbnail_class->create_thumbnail(null, $data);
@@ -1037,11 +1033,7 @@ class Document extends ORDataObject
             }
 
             // Store the file.
-            if ($GLOBALS['drive_encryption']) {
-                $storedData = $cryptoGen->encryptStandard($data, null, 'database');
-            } else {
-                $storedData = $data;
-            }
+            $storedData = $GLOBALS['drive_encryption'] ? $cryptoGen->encryptStandard($data, null, 'database') : $data;
             if (file_exists($filepath . $filenameUuid)) {
                 // this should never happen with current uuid mechanism
                 return xl('Failed since file already exists') . " $filepath$filenameUuid";
@@ -1143,7 +1135,7 @@ class Document extends ORDataObject
                 $data = $this->decrypt_content($data);
             }
             if ($base64Decode) {
-                $data = base64_decode($data);
+                $data = base64_decode((string) $data);
             }
         }
         return $data;
