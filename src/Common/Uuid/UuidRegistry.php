@@ -42,11 +42,13 @@ class UuidRegistry
         'ccda' => ['table_name' => 'ccda'],
         'documents' => ['table_name' => 'documents'],
         'drugs' => ['table_name' => 'drugs', 'table_id' => 'drug_id'],
+        'drug_sales' => ['table_name' => 'drug_sales', 'table_id' => 'sale_id'],
         'facility' => ['table_name' => 'facility'],
         'facility_user_ids' => ['table_name' => 'facility_user_ids', 'table_vertical' => ['uid', 'facility_id']],
         'form_clinical_notes' => ['table_name' => 'form_clinical_notes'],
         'form_encounter' => ['table_name' => 'form_encounter'],
         'form_vitals' => ['table_name' => 'form_vitals'],
+        'form_vitals_calculation' => ['table_name' => 'form_vitals_calculation'],
         'form_observation' => ['table_name' => 'form_observation'],
         'history_data' => ['table_name' => 'history_data'],
         'issue_encounter' => ['table_name' => 'issue_encounter'],
@@ -67,7 +69,8 @@ class UuidRegistry
         'questionnaire_response' => ['table_name' => 'questionnaire_response'],
         'patient_related_persons' => ['table_name' => 'patient_related_persons', 'table_id' => 'pid'],
         'form_history_sdoh' => ['table_name' => 'form_history_sdoh'],
-        'users' => ['table_name' => 'users']
+        'users' => ['table_name' => 'users'],
+        'care_teams' => ['table_name' => 'care_teams']
     ];
     // Maximum tries to create a unique uuid before failing (this should never happen)
     const MAX_TRIES = 100;

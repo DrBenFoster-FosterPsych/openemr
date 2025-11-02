@@ -3420,38 +3420,6 @@ parameters:
     identifier: nullCoalesce.variable
     count: 1
     path: interface/billing/sl_eob_invoice.php
-  - message: '#^Static method OpenEMR\\Billing\\ParseERA\:\:parseERAForCheck\(\) invoked with 2 parameters, 1 required\.$#'
-    identifier: arguments.count
-    count: 1
-    path: interface/billing/sl_eob_process.php
-  - message: '#^Static method OpenEMR\\Billing\\SLEOB\:\:arPostAdjustment\(\) invoked with 11 parameters, 8\-10 required\.$#'
-    identifier: arguments.count
-    count: 2
-    path: interface/billing/sl_eob_process.php
-  - message: '#^Static method OpenEMR\\Billing\\SLEOB\:\:arPostCharge\(\) invoked with 11 parameters, 9\-10 required\.$#'
-    identifier: arguments.count
-    count: 1
-    path: interface/billing/sl_eob_process.php
-  - message: '#^Variable \$InsertionId might not be defined\.$#'
-    identifier: variable.undefined
-    count: 1
-    path: interface/billing/sl_eob_process.php
-  - message: '#^Variable \$StringToEcho might not be defined\.$#'
-    identifier: variable.undefined
-    count: 1
-    path: interface/billing/sl_eob_process.php
-  - message: '#^Variable \$codetype on left side of \?\? always exists and is not nullable\.$#'
-    identifier: nullCoalesce.variable
-    count: 2
-    path: interface/billing/sl_eob_process.php
-  - message: '#^Variable \$cpt might not be defined\.$#'
-    identifier: variable.undefined
-    count: 1
-    path: interface/billing/sl_eob_process.php
-  - message: '#^Variable \$cpts might not be defined\.$#'
-    identifier: variable.undefined
-    count: 1
-    path: interface/billing/sl_eob_process.php
   - message: '#^Variable \$STMT_PRINT_CMD might not be defined\.$#'
     identifier: variable.undefined
     count: 1
@@ -5282,7 +5250,7 @@ parameters:
     path: interface/forms/eye_mag/php/eye_mag_functions.php
   - message: '#^Variable \$ODIOPTARGETS might not be defined\.$#'
     identifier: variable.undefined
-    count: 2
+    count: 1
     path: interface/forms/eye_mag/php/eye_mag_functions.php
   - message: '#^Variable \$ODIOPTARGET_values might not be defined\.$#'
     identifier: variable.undefined
@@ -5490,7 +5458,7 @@ parameters:
     path: interface/forms/eye_mag/php/eye_mag_functions.php
   - message: '#^Variable \$OSIOPTARGETS might not be defined\.$#'
     identifier: variable.undefined
-    count: 2
+    count: 1
     path: interface/forms/eye_mag/php/eye_mag_functions.php
   - message: '#^Variable \$OSIOPTARGET_values might not be defined\.$#'
     identifier: variable.undefined
@@ -9192,10 +9160,6 @@ parameters:
     identifier: variable.undefined
     count: 1
     path: interface/forms/prior_auth/view.php
-  - message: '#^Function gen_hl7_order invoked with 3 parameters, 2 required\.$#'
-    identifier: arguments.count
-    count: 2
-    path: interface/forms/procedure_order/common.php
   - message: '#^Variable \$encounter might not be defined\.$#'
     identifier: variable.undefined
     count: 1
@@ -14660,14 +14624,6 @@ parameters:
     identifier: arguments.count
     count: 1
     path: library/classes/Pharmacy.class.php
-  - message: '#^Method Prescription\:\:gen_lists_medication\(\) invoked with 2 parameters, 1 required\.$#'
-    identifier: arguments.count
-    count: 1
-    path: library/classes/Prescription.class.php
-  - message: '#^Undefined variable\: \$dosageInstructions$#'
-    identifier: variable.undefined
-    count: 1
-    path: library/classes/Prescription.class.php
   - message: '#^Variable \$arr might not be defined\.$#'
     identifier: variable.undefined
     count: 1
@@ -16140,10 +16096,6 @@ parameters:
     identifier: return.missing
     count: 2
     path: portal/patient/fwk/libs/util/parsecsv.lib.php
-  - message: '#^Constant MCRYPT_DEV_URANDOM not found\.$#'
-    identifier: constant.notFound
-    count: 1
-    path: portal/patient/fwk/libs/util/password.php
   - message: '#^Call to static method instance\(\) on an unknown class OAuthStore\.$#'
     identifier: class.notFound
     count: 1
@@ -16280,30 +16232,6 @@ parameters:
     identifier: variable.undefined
     count: 1
     path: portal/patient/fwk/libs/verysimple/DB/Reflection/DBTable.php
-  - message: '#^Constant MCRYPT_MODE_ECB not found\.$#'
-    identifier: constant.notFound
-    count: 1
-    path: portal/patient/fwk/libs/verysimple/Encryption/McryptUtil.php
-  - message: '#^Constant MCRYPT_RAND not found\.$#'
-    identifier: constant.notFound
-    count: 1
-    path: portal/patient/fwk/libs/verysimple/Encryption/McryptUtil.php
-  - message: '#^Constant MCRYPT_RIJNDAEL_256 not found\.$#'
-    identifier: constant.notFound
-    count: 1
-    path: portal/patient/fwk/libs/verysimple/Encryption/McryptUtil.php
-  - message: '#^Function mcrypt_create_iv not found\.$#'
-    identifier: function.notFound
-    count: 1
-    path: portal/patient/fwk/libs/verysimple/Encryption/McryptUtil.php
-  - message: '#^Function mcrypt_decrypt not found\.$#'
-    identifier: function.notFound
-    count: 1
-    path: portal/patient/fwk/libs/verysimple/Encryption/McryptUtil.php
-  - message: '#^Function mcrypt_encrypt not found\.$#'
-    identifier: function.notFound
-    count: 1
-    path: portal/patient/fwk/libs/verysimple/Encryption/McryptUtil.php
   - message: '#^Undefined variable\: \$attachment$#'
     identifier: variable.undefined
     count: 4
@@ -17104,10 +17032,6 @@ parameters:
     identifier: class.notFound
     count: 1
     path: src/Common/Auth/Exception/OneTimeAuthExpiredException.php
-  - message: '#^Caught class OpenEMR\\Common\\Auth\\u2flib_server\\Error not found\.$#'
-    identifier: class.notFound
-    count: 1
-    path: src/Common/Auth/MfaUtils.php
   - message: '#^Method OpenEMR\\Common\\Auth\\MfaUtils\:\:checkU2F\(\) should return bool but return statement is missing\.$#'
     identifier: return.missing
     count: 1
@@ -17144,30 +17068,6 @@ parameters:
     identifier: variable.undefined
     count: 1
     path: src/Common/Command/CreateReleaseChangelogCommand.php
-  - message: '#^Constant MCRYPT_MODE_ECB not found\.$#'
-    identifier: constant.notFound
-    count: 2
-    path: src/Common/Crypto/CryptoGen.php
-  - message: '#^Constant MCRYPT_RAND not found\.$#'
-    identifier: constant.notFound
-    count: 1
-    path: src/Common/Crypto/CryptoGen.php
-  - message: '#^Constant MCRYPT_RIJNDAEL_256 not found\.$#'
-    identifier: constant.notFound
-    count: 2
-    path: src/Common/Crypto/CryptoGen.php
-  - message: '#^Function mcrypt_create_iv not found\.$#'
-    identifier: function.notFound
-    count: 1
-    path: src/Common/Crypto/CryptoGen.php
-  - message: '#^Function mcrypt_decrypt not found\.$#'
-    identifier: function.notFound
-    count: 1
-    path: src/Common/Crypto/CryptoGen.php
-  - message: '#^Function mcrypt_get_iv_size not found\.$#'
-    identifier: function.notFound
-    count: 1
-    path: src/Common/Crypto/CryptoGen.php
   - message: '#^Constructor of class OpenEMR\\Common\\Forms\\FormVitals has an unused parameter \$_prefix\.$#'
     identifier: constructor.unusedParameter
     count: 1
@@ -17204,14 +17104,6 @@ parameters:
     identifier: variable.undefined
     count: 1
     path: src/Common/ORDataObject/ORDataObject.php
-  - message: '#^Caught class OpenEMR\\Common\\Utils\\Error not found\.$#'
-    identifier: class.notFound
-    count: 2
-    path: src/Common/Utils/RandomGenUtils.php
-  - message: '#^Caught class OpenEMR\\Common\\Utils\\Exception not found\.$#'
-    identifier: class.notFound
-    count: 2
-    path: src/Common/Utils/RandomGenUtils.php
   - message: '#^Method OpenEMR\\Core\\Header\:\:readConfigFile\(\) should return array but return statement is missing\.$#'
     identifier: return.missing
     count: 1
@@ -17344,22 +17236,6 @@ parameters:
     identifier: variable.undefined
     count: 1
     path: src/PaymentProcessing/Sphere/SpherePayment.php
-  - message: '#^Caught class Symfony\\Component\\Debug\\ExceptionHandler not found\.$#'
-    identifier: class.notFound
-    count: 3
-    path: src/Pdf/PdfCreator.php
-  - message: '#^Instantiated class Symfony\\Component\\Debug\\ExceptionHandler not found\.$#'
-    identifier: class.notFound
-    count: 1
-    path: src/Pdf/PdfCreator.php
-  - message: '#^Undefined variable\: \$pdfFilePath$#'
-    identifier: variable.undefined
-    count: 1
-    path: src/Pdf/PdfCreator.php
-  - message: '#^Variable \$pdfwkout might not be defined\.$#'
-    identifier: variable.undefined
-    count: 2
-    path: src/Pdf/PdfCreator.php
   - message: '#^Call to an undefined static method OpenEMR\\Common\\Http\\oeHttp\:\:getCurlOptions\(\)\.$#'
     identifier: staticMethod.notFound
     count: 1
@@ -17416,10 +17292,6 @@ parameters:
     identifier: variable.undefined
     count: 3
     path: src/Rx/RxList.php
-  - message: '#^Variable \$code on left side of \?\? always exists and is not nullable\.$#'
-    identifier: nullCoalesce.variable
-    count: 1
-    path: src/Services/CarePlanService.php
   - message: '#^Variable \$ct_id might not be defined\.$#'
     identifier: variable.undefined
     count: 2
@@ -17564,10 +17436,6 @@ parameters:
     identifier: nullCoalesce.variable
     count: 4
     path: src/Services/Cda/CdaTemplateParse.php
-  - message: '#^Instantiated class Laminas\\Config\\Reader\\Exception\\RuntimeException not found\.$#'
-    identifier: class.notFound
-    count: 3
-    path: src/Services/Cda/XmlExtended.php
   - message: '#^Variable \$form_id in empty\(\) always exists and is not falsy\.$#'
     identifier: empty.variable
     count: 1

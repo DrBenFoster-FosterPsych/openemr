@@ -195,6 +195,9 @@ CREATE TABLE `care_teams` (
 ) ENGINE=InnoDB;
 #EndIf
 
+#IfNotRow2D list_options list_id lists option_id care_team_roles
+INSERT INTO `list_options` (`list_id`, `option_id`, `title`) VALUES ('lists','care_team_roles','Care Team Roles');
+#EndIf
 #IfNotRow list_options list_id care_team_roles
 INSERT INTO list_options (list_id, option_id, title, seq, codes, notes) VALUES
    ('care_team_roles', 'primary_care_provider', 'Primary Care Provider', 10, 'SNOMED-CT:62247001', ''),
@@ -206,7 +209,6 @@ INSERT INTO list_options (list_id, option_id, title, seq, codes, notes) VALUES
    ('care_team_roles', 'specialist', 'Specialist', 70, 'SNOMED-CT:419772000', ''),
    ('care_team_roles', 'other', 'Other', 80, 'SNOMED-CT:106292003', '');
 #EndIf
-
 
 -- ---------------------------------------------------------------------------------------------------------------------------------
 --
@@ -990,6 +992,10 @@ VALUES ('OccupationODH','23-1011.00','Lawyers',10,'23-1011.00.031000',1),
 #IfMissingColumn form_care_plan plan_status
 ALTER TABLE `form_care_plan` ADD COLUMN `plan_status` VARCHAR(32) DEFAULT NULL COMMENT 'Care Plan status (e.g., draft, active, completed, etc)';
 #EndIf
+-- Add proposed_date to care plan
+#IfMissingColumn form_care_plan proposed_date
+ALTER TABLE `form_care_plan` ADD COLUMN `proposed_date` DATETIME NULL COMMENT 'Target or Achieve-by date for the goal';
+#EndIf
 
 #IfNotIndex form_care_plan idx_status_date
 ALTER TABLE `form_care_plan` ADD INDEX `idx_status_date` (`plan_status`, `date`, `date_end`);
@@ -1490,4 +1496,246 @@ ALTER TABLE `form_misc_billing_options` ADD UNIQUE `encounter` (`encounter`);
 #EndIf
 
 #IfMBOEncounterNeeded
+#EndIf
+-- ------------------------------------------------------------------- 10-17-2025 sjp -----------------------------------------------------------------------------
+-- Care Team Roles: parent list entry --Bug fix
+-- Care Team Roles: add if missing
+
+UPDATE `list_options` SET option_id = 'family_medicine_specialist', title = 'Family Medicine Specialist'
+WHERE list_id = 'care_team_roles' AND option_id = 'primary_care_provider' AND codes = 'SNOMED-CT:62247001';
+
+#IfNotRow2D list_options list_id lists option_id care_team_roles
+INSERT INTO `list_options` (`list_id`, `option_id`, `title`) VALUES ('lists','care_team_roles','Care Team Roles');
+#EndIf
+#IfNotRow2D list_options list_id care_team_roles option_id healthcare_professional
+INSERT IGNORE INTO `list_options` (`list_id`,`option_id`,`title`,`seq`,`is_default`,`codes`,`activity`) VALUES
+     ('care_team_roles','physician','Physician',90,0,'SNOMED-CT:158965000',1),
+     ('care_team_roles','nurse_practitioner','Nurse Practitioner',100,0,'SNOMED-CT:224571005',1),
+     ('care_team_roles','physician_assistant','Physician Assistant',110,0,'SNOMED-CT:449161006',1),
+     ('care_team_roles','therapist','Clinical Therapist',120,0,'SNOMED-CT:224538006',1),
+     ('care_team_roles','primary_care_provider','Primary Care Provider',130,0,'SNOMED-CT:446050000',1),
+     ('care_team_roles','dietitian','Dietitian',140,0,'SNOMED-CT:159033005',1),
+     ('care_team_roles','mental_health','Mental Health Professional',150,0,'SNOMED-CT:224597008',1),
+     ('care_team_roles','healthcare_professional','Healthcare Professional',160,0,'SNOMED-CT:223366009',1);
+#EndIf
+
+#IfNotTable form_vitals_calculation
+CREATE TABLE `form_vitals_calculation` (
+   `id` int NOT NULL AUTO_INCREMENT,
+   `uuid` binary(16) DEFAULT NULL,
+   `encounter` bigint(20) DEFAULT NULL COMMENT 'fk to form_encounter.id',
+   `pid` bigint(20) NOT NULL COMMENT 'fk to patient_data.pid',
+   `date_start` datetime DEFAULT NULL,
+   `date_end` datetime DEFAULT NULL,
+   `created_at` datetime DEFAULT NULL,
+   `updated_at` datetime DEFAULT NULL,
+   `created_by` bigint(20) DEFAULT NULL,
+   `updated_by` bigint(20) DEFAULT NULL,
+   `calculation_id` varchar(64) DEFAULT NULL COMMENT 'application identifier representing calculation e.g., bp-MeanLast5, bp-Mean3Day, bp-MeanEncounter',
+   PRIMARY KEY (`id`),
+   UNIQUE KEY `unq_uuid` (`uuid`),
+   KEY `idx_pid` (`pid`),
+   KEY `idx_encounter` (`encounter`),
+   KEY `idx_calculation_id` (`calculation_id`)
+) ENGINE=InnoDB COMMENT = 'Main calculation records - one per logical calculation (e.g., average BP)';
+#EndIf
+
+#IfNotTable form_vitals_calculation_components
+CREATE TABLE `form_vitals_calculation_components` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fvc_uuid` binary(16) NOT NULL COMMENT 'fk to form_vitals_calculation.uuid',
+  `vitals_column` varchar(64) NOT NULL COMMENT 'Component type: bps, bpd, pulse, etc.',
+  `value` DECIMAL(12,6) DEFAULT NULL COMMENT 'Calculated numeric component value',
+  `value_string` varchar(255) DEFAULT NULL COMMENT 'Calculated non-numeric component value',
+  `value_unit` varchar(16) DEFAULT NULL COMMENT 'Unit for this component value',
+  `component_order` int NOT NULL DEFAULT 0 COMMENT 'Display order for components',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_fvc_component` (`fvc_uuid`, `vitals_column`),
+  KEY `idx_vitals_column` (`vitals_column`),
+  KEY `idx_component_order` (`fvc_uuid`, `component_order`)
+) ENGINE=InnoDB COMMENT = 'Component values for calculations (e.g., systolic=120, diastolic=80)';
+#EndIf
+
+#IfNotTable form_vitals_calculation_form_vitals
+CREATE TABLE `form_vitals_calculation_form_vitals` (
+    `fvc_uuid` binary(16) NOT NULL COMMENT 'fk to form_vitals_calculation.uuid',
+    `vitals_id` bigint(20) NOT NULL COMMENT 'fk to form_vitals.id',
+    PRIMARY KEY (`fvc_uuid`, `vitals_id`)
+) ENGINE=InnoDB COMMENT = 'Join table between form_vitals_calculation and form_vitals table representing the derivative observation relationship between the calculation and the source records';
+#EndIf
+
+#IfMissingColumn drug_sales uuid
+ALTER TABLE `drug_sales` ADD COLUMN `uuid` binary(16) DEFAULT NULL COMMENT 'UUID for this drug sales record, for data exchange purposes';
+ALTER TABLE `drug_sales` ADD UNIQUE KEY `uuid_unique` (`uuid`);
+#EndIf
+
+#IfMissingColumn drug_sales pharmacy_supply_type
+ALTER TABLE `drug_sales` ADD COLUMN `pharmacy_supply_type` VARCHAR(50) DEFAULT NULL COMMENT 'fk to list_options.option_id where list_id=pharmacy_supply_type to indicate type of dispensing first order, refil, emergency, partial order, etc';
+#EndIf
+
+#IfNotRow list_options list_id act_pharmacy_supply_type
+INSERT INTO list_options (list_id, option_id, title, seq, is_default, option_value, notes, activity)
+VALUES ('lists','act_pharmacy_supply_type','Act Pharmacy Supply Type',0,0,0,'Codeset from valueset http://terminology.hl7.org/ValueSet/v3-ActPharmacySupplyType (HL7 v3 ActCode)',1);
+
+-- Act Pharmacy Supply Type codes from HL7 v3 ActCode system
+INSERT INTO list_options (list_id, option_id, title, seq, codes, notes)
+VALUES ('act_pharmacy_supply_type', 'DF', 'Daily Fill', 10, 'DF', 'A fill providing sufficient supply for one day'),
+       ('act_pharmacy_supply_type', 'EM', 'Emergency Supply', 20, 'EM', 'A supply action where there is no valid order for the supplied medication'),
+       ('act_pharmacy_supply_type', 'SO', 'Script Owing', 30, 'SO', 'An emergency supply where the expectation is that a formal order authorizing the supply will be provided at a later date'),
+       ('act_pharmacy_supply_type', 'FF', 'First Fill', 40, 'FF', 'The initial fill against an order'),
+       ('act_pharmacy_supply_type', 'FFS', 'Fee for Service', 50, 'FFS', 'A billing arrangement where a Provider charges a separate fee for each intervention/procedure/event or product'),
+       ('act_pharmacy_supply_type', 'FPFF', 'First Fill - Part Fill', 60, 'FPFF', 'A first fill where the quantity supplied is less than one full repetition of the ordered amount'),
+       ('act_pharmacy_supply_type', 'FFCS', 'First Fill Complete, Sub', 70, 'FFCS', 'A first fill where the quantity supplied is equal to one full repetition and strength supplied is less than ordered'),
+       ('act_pharmacy_supply_type', 'TFS', 'Trial Fill Partial', 80, 'TFS', 'A fill where a small portion is provided to allow for determination of therapy effectiveness and patient tolerance'),
+       ('act_pharmacy_supply_type', 'FFC', 'First Fill Complete', 90, 'FFC', 'A first fill where the quantity supplied is equal to one full repetition of the ordered amount'),
+       ('act_pharmacy_supply_type', 'FFP', 'First Fill, Part Fill', 100, 'FFP', 'A first fill where the quantity supplied is less than one full repetition of the ordered amount'),
+       ('act_pharmacy_supply_type', 'FFSS', 'First Fill, Partial Strength', 110, 'FFSS', 'A first fill where the strength supplied is less than the ordered strength'),
+       ('act_pharmacy_supply_type', 'TF', 'Trial Fill', 120, 'TF', 'A fill where a small portion is provided to allow for determination of therapy effectiveness and patient tolerance'),
+       ('act_pharmacy_supply_type', 'FS', 'Floor stock', 130, 'FS', 'A supply action to restock a smaller more local dispensary'),
+       ('act_pharmacy_supply_type', 'MS', 'Manufacturer Sample', 140, 'MS', 'A supply of a manufacturer sample'),
+       ('act_pharmacy_supply_type', 'RF', 'Refill', 150, 'RF', 'A fill against an order that has already been filled at least once'),
+       ('act_pharmacy_supply_type', 'UD', 'Unit Dose', 160, 'UD', 'A supply action that provides sufficient material for a single dose'),
+       ('act_pharmacy_supply_type', 'RFC', 'Refill - Complete', 170, 'RFC', 'A refill where the quantity supplied is equal to one full repetition of the ordered amount'),
+       ('act_pharmacy_supply_type', 'RFCS', 'Refill Complete, Partial Strength', 180, 'RFCS', 'A refill complete fill where the strength supplied is less than the ordered strength'),
+       ('act_pharmacy_supply_type', 'RFF', 'Refill First Fill this Facility', 190, 'RFF', 'The first fill against an order that has already been filled at least once at another facility'),
+       ('act_pharmacy_supply_type', 'RFFS', 'Refill First Fill, Partial Strength', 200, 'RFFS', 'The first fill at another facility where the strength supplied is less than ordered'),
+       ('act_pharmacy_supply_type', 'RFP', 'Refill with Partial Fill', 210, 'RFP', 'A refill where the quantity supplied is less than one full repetition of the ordered amount'),
+       ('act_pharmacy_supply_type', 'RFPS', 'Refill Partial Fill, Partial Strength', 220, 'RFPS', 'A refill partial fill where the strength supplied is less than the ordered strength'),
+       ('act_pharmacy_supply_type', 'RFS', 'Refill partial strength', 230, 'RFS', 'A refill where the strength supplied is less than the ordered strength'),
+       ('act_pharmacy_supply_type', 'TB', 'Trial Balance', 240, 'TB', 'A fill where the remainder of a complete fill is provided after a trial fill'),
+       ('act_pharmacy_supply_type', 'TBS', 'Trial Balance Partial Strength', 250, 'TBS', 'A fill where the remainder is provided after a trial fill and strength is less than ordered'),
+       ('act_pharmacy_supply_type', 'UDE', 'Unit Dose Equivalent', 260, 'UDE', 'A supply action that provides sufficient material for a single dose via multiple products');
+#EndIf
+
+-- update NCI codes for drug_route list options
+#IfNotRow3D list_options list_id drug_route option_id intradermal codes NCI-CONCEPT-ID:C38238
+UPDATE `list_options` SET codes='NCI-CONCEPT-ID:C38288' WHERE list_id='drug_route' AND option_id=1 AND title="Per Oris";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38295" WHERE list_id='drug_route' AND option_id=2 AND title="Per Rectum";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38675" WHERE list_id='drug_route' AND option_id=3 AND title="To Skin";
+-- 4 codes are empty as there is no mapping for 'To Affected Area' as it depends on the region (skin, internal, tumor, etc)
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38300" WHERE list_id='drug_route' AND option_id=5 AND title="Sublingual";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38300" WHERE list_id='drug_route' AND option_id=6 AND title="Left Eye";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38300" WHERE list_id='drug_route' AND option_id=7 AND title="Right Eye";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38287" WHERE list_id='drug_route' AND option_id=8 AND title="Each Eye";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38299" WHERE list_id='drug_route' AND option_id=9 AND title="Subcutaneous";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C28161" WHERE list_id='drug_route' AND option_id=10 AND title="IM";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38276" WHERE list_id='drug_route' AND option_id=11 AND title="IV";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38284" WHERE list_id='drug_route' AND option_id=12 AND title="NS";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38192" WHERE list_id='drug_route' AND option_id=13 AND title="Both Ears";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38192" WHERE list_id='drug_route' AND option_id=14 AND title="Left Ear";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38192" WHERE list_id='drug_route' AND option_id=15 AND title="Right Ear";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38238" WHERE list_id='drug_route' AND option_id="intradermal";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38290" WHERE list_id='drug_route' AND option_id="other";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38305" WHERE list_id='drug_route' AND option_id="transdermal";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C28161" WHERE list_id='drug_route' AND option_id="intramuscular";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38216" WHERE list_id='drug_route' AND option_id="inhale";
+UPDATE `list_options` SET codes="NCI-CONCEPT-ID:C38288" WHERE list_id='drug_route' AND option_id="bymouth";
+#EndIf
+
+#IfMissingColumn drug_sales last_updated
+ALTER TABLE `drug_sales` ADD `last_updated` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+#EndIf
+
+#IfMissingColumn drug_sales date_created
+ALTER TABLE `drug_sales` ADD `date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+#EndIf
+
+#IfMissingColumn drug_sales updated_by
+ALTER TABLE `drug_sales` ADD `updated_by` BIGINT(20) DEFAULT NULL;
+#EndIf
+
+#IfMissingColumn drug_sales created_by
+ALTER TABLE `drug_sales` ADD `created_by` BIGINT(20) DEFAULT NULL;
+#EndIf
+
+#IfNotRow4D list_options list_id drug_interval option_id 15 codes Q1H title h
+-- Empty/default option
+UPDATE `list_options` SET codes='', notes='No specific dosing interval specified' WHERE list_id='drug_interval' AND option_id='0';
+
+-- Standard frequency intervals
+UPDATE `list_options` SET codes='BID', notes='Twice daily (bis in die) - Two times a day at institution specified time' WHERE list_id='drug_interval' AND option_id='1' AND title='b.i.d.';
+UPDATE `list_options` SET codes='TID', notes='Three times daily (ter in die) - Three times a day at institution specified time' WHERE list_id='drug_interval' AND option_id='2' AND title='t.i.d.';
+UPDATE `list_options` SET codes='QID', notes='Four times daily (quater in die) - Four times a day at institution specified time' WHERE list_id='drug_interval' AND option_id='3' AND title='q.i.d.';
+
+-- Hour-based intervals
+UPDATE `list_options` SET codes='Q3H', notes='Every 3 hours - Administer medication every three hours' WHERE list_id='drug_interval' AND option_id='4' AND title='q.3h';
+UPDATE `list_options` SET codes='Q4H', notes='Every 4 hours - Administer medication every four hours' WHERE list_id='drug_interval' AND option_id='5' AND title='q.4h';
+UPDATE `list_options` SET codes='', notes='Every 5 hours - No standard FHIR code available' WHERE list_id='drug_interval' AND option_id='6' AND title='q.5h';
+UPDATE `list_options` SET codes='Q6H', notes='Every 6 hours - Administer medication every six hours' WHERE list_id='drug_interval' AND option_id='7' AND title='q.6h';
+UPDATE `list_options` SET codes='Q8H', notes='Every 8 hours - Administer medication every eight hours' WHERE list_id='drug_interval' AND option_id='8' AND title='q.8h';
+
+-- Daily dosing
+UPDATE `list_options` SET codes='QD', notes='Once daily (quaque die) - Daily at institution specified time' WHERE list_id='drug_interval' AND option_id='9' AND title='Daily';
+
+-- Meal-related timing (no FHIR codes available for these)
+UPDATE `list_options` SET codes='', notes='Before meals (ante cibum) - Take medication before eating' WHERE list_id='drug_interval' AND option_id='10' AND title='a.c.';
+UPDATE `list_options` SET codes='', notes='After meals (post cibum) - Take medication after eating' WHERE list_id='drug_interval' AND option_id='11' AND title='p.c.';
+
+-- Time of day
+UPDATE `list_options` SET codes='AM', notes='Morning (ante meridiem) - Administer in the morning hours' WHERE list_id='drug_interval' AND option_id='12' AND title='a.m.';
+UPDATE `list_options` SET codes='PM', notes='Evening (post meridiem) - Administer in the evening hours' WHERE list_id='drug_interval' AND option_id='13' AND title='p.m.';
+
+-- "Ante" means "before"
+UPDATE `list_options` SET codes='', notes='Before - General instruction meaning "before" (ante)' WHERE list_id='drug_interval' AND option_id='14' AND title='ante';
+
+-- Hour unit
+UPDATE `list_options` SET codes='Q1H', notes='Every 1 hour - Administer medication every hour' WHERE list_id='drug_interval' AND option_id='15' AND title='h';
+
+-- Bedtime
+UPDATE `list_options` SET codes='HS', notes='At bedtime (hora somni) - Administer at bedtime or hour of sleep' WHERE list_id='drug_interval' AND option_id='16' AND title='h.s.';
+
+-- As needed (should be PRN, but nothing in FHIR)
+UPDATE `list_options` SET codes='', notes='As needed (pro re nata) - Take medication when necessary or as required' WHERE list_id='drug_interval' AND option_id='17' AND title='p.r.n.';
+
+-- Immediately (should be STAT but nothing in FHIR)
+UPDATE `list_options` SET codes='', notes='Immediately (statim) - Administer medication immediately' WHERE list_id='drug_interval' AND option_id='18' AND title='stat';
+
+-- Extended intervals
+UPDATE `list_options` SET codes='WK', notes='Weekly - Once per week' WHERE list_id='drug_interval' AND option_id='19' AND title='Weekly';
+UPDATE `list_options` SET codes='MO', notes='Monthly - Once per month' WHERE list_id='drug_interval' AND option_id='20' AND title='Monthly';
+#EndIf
+
+#IfNotRow2D list_options list_id medication_adherence_information_source option_id professional_nurse
+INSERT INTO list_options (list_id, option_id, title, seq, is_default, option_value, notes, activity)
+VALUES ('lists','medication_adherence_information_source','Information Source for Medication Adherence',0,0,0,'Codeset from valueset http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1267.11 (InformationSourceForMedicationAdherence)',1);
+
+-- this is an example value set which means the value set can be nearly anything we want here so we can expand in the future if needed
+INSERT INTO list_options (list_id, option_id, title, seq, codes)
+VALUES ('medication_adherence_information_source', 'professional_nurse', 'Professional Nurse (occupation)', 10, 'SNOMED-CT:106292003'),
+        ('medication_adherence_information_source', 'patient', 'Patient (person)', 20, 'SNOMED-CT:116154003'),
+       ('medication_adherence_information_source', 'pharmacy', 'Pharmacy', 30, 'HSOC:1179-1'),
+       ('medication_adherence_information_source', 'home_care', 'Home Care', 40, 'HSOC:1192-4'),
+       ('medication_adherence_information_source', 'location_outside_facility', 'Location Outside Facility', 50, 'HSOC:1204-7'),
+       ('medication_adherence_information_source', 'adm_physician', 'admitting physician', 60, 'ParticipationFunction:ADMPHYS'),
+       ('medication_adherence_information_source', 'parent', 'Parent', 70, 'ParticipationFunction:PRN');
+#EndIf
+
+#IfNotRow2D list_options list_id medication_adherence option_id compliance
+INSERT INTO list_options (list_id, option_id, title, seq, is_default, option_value, notes, activity)
+VALUES ('lists','medication_adherence','Medication Adherence',0,0,0,'Codeset from valueset http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1240.8 (rMedicationAdherence)',1);
+
+INSERT INTO list_options (list_id, option_id, title, seq, codes)
+VALUES ('medication_adherence', 'compliance', 'Complies with drug therapy (finding)', 10, 'SNOMED-CT:1156699004'),
+       ('medication_adherence', 'non_compliance', 'Does not take medication (finding)', 20, 'SNOMED-CT:715036001'),
+       ('medication_adherence', 'asked_declined', 'Asked But Declined', 30, 'DataAbsentReason:asked-declined'),
+       ('medication_adherence', 'asked_unknown', 'Asked But Unknown', 40, 'DataAbsentReason:asked-unknown'),
+       ('medication_adherence', 'not_asked', 'Not Asked', 50, 'DataAbsentReason:not-asked'),
+       ('medication_adherence', 'unknown', 'Unknown', 60, 'DataAbsentReason:unknown');
+#EndIf
+
+#IfMissingColumn lists_medication medication_adherence_information_source
+ALTER TABLE lists_medication ADD COLUMN `medication_adherence_information_source` VARCHAR(50) DEFAULT NULL COMMENT 'fk to list_options.option_id where list_id=medication_adherence_information_source to indicate who provided the medication adherence information';
+ALTER TABLE lists_medication ADD COLUMN `medication_adherence` VARCHAR(50) DEFAULT NULL COMMENT 'fk to list_options.option_id where list_id=medication_adherence to indicate if patient is complying with medication regimen';
+ALTER TABLE lists_medication ADD COLUMN `medication_adherence_date_asserted` DATETIME DEFAULT NULL COMMENT 'Date when the medication adherence information was asserted';
+#EndIf
+
+#IfMissingColumn prescriptions diagnosis
+-- prescriptions has an indication column which would normally be this diagnosis but Weno and other tables seem to use
+-- this as some kind of identifier so we can't use that column
+ALTER TABLE prescriptions ADD COLUMN diagnosis TEXT COMMENT 'Diagnosis or reason for the prescription';
+#EndIf
+
+#IfMissingColumn lists_medication prescription_id
+-- instead of linking medications by their title, we can link them by prescription_id to the prescriptions table
+ALTER TABLE lists_medication ADD COLUMN `prescription_id` BIGINT(20) DEFAULT NULL COMMENT 'fk to prescriptions.prescription_id to link medication to prescription record';
 #EndIf

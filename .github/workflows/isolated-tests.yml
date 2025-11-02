@@ -28,6 +28,7 @@ jobs:
         - '8.3'
         - '8.4'
         - '8.5'
+        - '8.6'
 
     name: PHP ${{ matrix.php-version }} - Isolated Tests
 
@@ -83,11 +84,20 @@ jobs:
       uses: codecov/test-results-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        files: junit.xml
         flags: isolated,php${{ matrix.php-version }}
+
+    - name: Hide test results from subsequent uploads
+      if: ${{ !cancelled() && hashFiles('junit.xml') != '' }}
+      run: mv junit.xml junit.saved-test-data
+
+    - name: Unhide test results for GitHub upload
+      if: ${{ !cancelled() && hashFiles('junit.saved-test-data') != '' }}
+      run: mv junit.saved-test-data junit.xml
 
     - name: Upload JUnit test results to GitHub
       if: ${{ success() || failure() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: junit-isolated-tests-php-${{ matrix.php-version }}
         path: junit.xml
@@ -101,7 +111,7 @@ jobs:
 
     - name: Upload coverage reports to GitHub
       if: ${{ steps.check-files.outputs.clover_exists == 'true' && steps.check-files.outputs.html_exists == 'true' && (success() || failure()) }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: coverage-isolated-tests-php-${{ matrix.php-version }}
         path: |
