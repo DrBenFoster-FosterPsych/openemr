@@ -1,0 +1,111 @@
+﻿<!-- UPLOAD STYLE.CSS -->
+<link rel="stylesheet" href="/interface/forms/psychotherapy_note/style.css?v={{ "now"|date("U") }}">
+
+<div class="oe-custom-form container-fluid">
+
+  <style>
+    .oe-custom-form h3.form-section-header {
+      text-align: center;
+      color: var(--text-color, #fff);
+      margin-top: 1rem;
+      margin-bottom: .75rem;
+      border-bottom: 1px solid var(--text-color, #666);
+      padding-bottom: .25rem;
+    }
+    .oe-custom-form p { margin: .25rem 0; }
+  </style>
+
+  <div class="page-header"><h2>Psychotherapy Note</h2></div>
+
+  <!------------->
+  <!-- General -->
+  <!------------->
+  <h3 class="form-section-header">General</h3>
+  <p><strong>Subjective:</strong> {{ form.subjective|default('N/A') }}</p>
+  <p><strong>Objective:</strong> {{ form.objective|default('N/A') }}</p>
+
+  <!------------------->
+  <!-- Mental Status -->
+  <!------------------->
+  <h3 class="form-section-header">Mental Status Exam</h3>
+  {% set mental_fields = [
+    'orientation','attention','appearance','behavior','speech',
+    'affect','mood','thought_process','thought_content','judgment','insight'
+  ] %}
+  {% for field in mental_fields %}
+    {% set raw = attribute(form, field)|default('') %}
+    {% if raw is iterable %}
+      {% set clean = raw|join(', ') %}
+    {% else %}
+      {% set clean = raw|replace({'[':'',']':'','"':''}) %}
+    {% endif %}
+    <p><strong>{{ field|replace({'_':' '})|capitalize }}:</strong>
+      {{ clean|default('N/A') }}
+    </p>
+  {% endfor %}
+
+  <!---------->
+  <!-- Risk -->
+  <!---------->
+  <h3 class="form-section-header">Risk Assessment</h3>
+  {% if form.denies_all_risk == 1 %}
+    <p>Denies all risk.</p>
+  {% else %}
+    {% for fld,label in {
+      'suicide_level':'Suicide Risk Level',
+      'homicide_level':'Homicide Risk Level',
+      'selfharm_level':'Self-Harm Risk Level'
+    } %}
+      {% set raw = attribute(form, fld)|default('') %}
+      {% if raw is iterable %}
+        {% set clean = raw|join(', ') %}
+      {% else %}
+        {% set clean = raw|replace({'[':'',']':'','"':''}) %}
+      {% endif %}
+      <p><strong>{{ label }}:</strong>
+        {{ clean|default('N/A') }}
+      </p>
+    {% endfor %}
+    <p><strong>Additional Relevant Information:</strong> {{ form.risk_info|default('N/A') }}</p>
+  {% endif %}
+  <p><strong>Overall Risk:</strong> {{ form.overall_risk|default('N/A') }}</p>
+
+  <!---------------->
+  <!-- Assessment -->
+  <!---------------->
+  <h3 class="form-section-header">Assessment</h3>
+  {% for field in [
+    'clinical_summary','diagnostic_support','assessment_symptoms',
+    'medical_necessity','therapeutic_interventions'
+  ] %}
+    <p><strong>{{ field|replace({'_':' '})|capitalize }}:</strong>
+      {{ attribute(form, field)|default('N/A') }}
+    </p>
+  {% endfor %}
+  <!----------->
+  <!-- Goals -->
+  <!----------->
+  <h3 class="form-section-header">Progress Toward Goals</h3>
+  <p><strong>Description of Treatment Goals:</strong> {{ form.treatment_goals|default('N/A') }}</p>
+  <p><strong>Overall Progress Toward Goals:</strong> {{ form.goals_progress|default('N/A') }}</p>
+
+  {% set raw_barriers = form.barriers|default('') %}
+  {% if raw_barriers is iterable %}
+    {% set clean_barriers = raw_barriers|join(', ') %}
+  {% else %}
+    {% set clean_barriers = raw_barriers|replace({'[':'',']':'','"':''}) %}
+  {% endif %}
+  <p><strong>Barriers to Achieving Goals:</strong>
+     {{ clean_barriers|default('N/A') }}
+  </p>
+
+  <!---------->
+  <!-- Plan -->
+  <!---------->
+  <h3 class="form-section-header">Plan</h3>
+  <p><strong>Next Steps:</strong> {{ form.next_steps|default('N/A') }}</p>
+  <p><strong>Date of Next Appointment:</strong> {{ form.next_appt_date|default('N/A') }}</p>
+  <p><strong>Time of Next Appointment:</strong> {{ form.next_appt_time|default('N/A') }}</p>
+
+  <br/>
+</div>

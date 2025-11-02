@@ -1,0 +1,57 @@
+﻿/* ======================== */
+/* oe-custom-form CSS file  */
+/* ======================== */
+
+/* Section Header fixes */
+.oe-custom-form h3.form-section-header {
+    color: var(--text-color, #fff);
+    text-align: left;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+/* Label fixes */
+.oe-custom-form label.form-label {
+    color: var(--text-color, #fff);
+    text-align: center;
+    align-items: center;
+    display: block;
+    margin-bottom: .25rem;
+}
+
+/* Centering input fields */
+.oe-custom-form textarea,
+.oe-custom-form .selectors,
+.oe-custom-form input.form-control,
+.oe-custom-form select.form-control,
+.oe-custom-form .risk-check {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+/* Textarea styling */
+.oe-custom-form textarea {
+    height: 100px;
+    width: 66%;
+    box-sizing: content-box;
+    margin: 0 auto 1rem auto;
+}
+
+/* Checkbox group styling */
+.oe-custom-form .checkbox-group {
+    display: grid;
+    place-items: center;
+    text-align: center;
+    grid-template-columns: repeat(3, 1fr);
+    width: 66%;
+    gap: 0.25rem .5rem;
+    color: var(--text-color, #fff);
+    border: 1px solid var(--text-color, #fff);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0 auto 1rem auto;
+    background-color: var(--bg-color, transparent);
+}
+
+.oe-custom-form label.risk-check-label { color: var(--text-color, #fff) }

@@ -1,0 +1,259 @@
+﻿
+<!-- UPLOAD STYLE.CSS -->
+<link rel="stylesheet" href="/interface/forms/Psychotherapy_note/style.css?v={{ "now"|date("U") }}">
+
+<div class="container-fluid oe-form">
+  <form name="Psychotherapy_note"
+    method="post"
+    action="{{ FORM_ACTION }}/interface/forms/Psychotherapy_note/save.php"
+    onsubmit="return top.restoreSession()"
+    class="oe-custom-form form-horizontal">
+    
+  <input type="hidden" name="csrf_token_form" value="{{ csrfTokenRaw()|e }}" />
+
+    <!-- ======================== -->
+    <!-- General Block -->
+    <!-- ======================== -->
+    <h3 class="form-section-header">General</h3>
+
+    <label class="form-label">Subjective</label>
+    <textarea name="subjective">{{ attribute(form, 'subjective') }}</textarea>
+
+    <label class="form-label">Objective</label>
+    <textarea name="objective">{{ attribute(form, 'objective') }}</textarea>
+
+    <!-- ======================== -->
+    <!-- Mental Status Exam Block -->
+    <!-- ======================== -->
+    <h3 class="form-section-header">Mental Status Exam</h3>
+
+    {% set mental_status_fields = {
+      'orientation': ['AOx1','AOx2','AOx3','AOx4'],
+      'attention': ['WNL','Somnolent','Lethargic','Obtunded','Stupor','Comatose','Selective Attention','Confused','Delirium'],
+      'appearance': ['WNL','Disheveled','Unkempt'],
+      'behavior': ['WNL','Inappropriate Eye Contact','Decreased Movement','Physically Threatening','Increased Movement'],
+      'speech': ['WNL','Abnormal Rate','Abnormal Volume','Flattened Prosody','Delayed','Pressured','Hyperverbal'],
+      'affect': ['WNL','Incongruent','Restricted','Blunted','Flat','Labile'],
+      'mood': ['WNL','Euthymic','Heightened','Elevated','Expansive','Euphoric','Dysthymic','Dysphoric','Depressed','Anxious','Irritable','Angry'],
+      'thought_process': ['WNL','Circumstantial','Concrete','Ruminative','Perseverative','Tangential','Disorganized','Internal Preoccupation','Blocking'],
+      'thought_content': ['WNL','Auditory Hallucinations','Visual Hallucinations','Delusions','Ideas of Reference','Poverty of Content','Obsessions','Paranoid Ideation'],
+      'judgment': ['WNL','Fair','Poor','Impaired'],
+      'insight': ['WNL','Fair','Poor','Impaired']
+    } %}
+
+    {% for field, options in mental_status_fields %}
+      <label class="form-label">{{ field|replace({'_':' '})|capitalize }}</label>
+      <div class="checkbox-group">
+        {% set field_values = attribute(form, field) is iterable ? attribute(form, field) : [] %}
+        {% for opt in options %}
+          <div class="form-check">
+            <label class="form-check-label" for="{{ field }}_{{ loop.index }}">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                name="{{ field }}[]"
+                value="{{ opt }}"
+                id="{{ field }}_{{ loop.index }}"
+                {% if opt in field_values %}checked{% endif %}>
+              {{ opt }}
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    <!-- ======================== -->
+    <!-- Risk Assessment Block    -->
+    <!-- ======================== -->
+    <h3 class="form-section-header">Risk Assessment</h3>
+
+    <!-- Denies all risk -->
+    <div class="risk-check">
+      <input
+        type="checkbox"
+        class="risk-check-input"
+        id="denies_all_risk"
+        name="denies_all_risk"
+        value="1"
+        {% if attribute(form, 'denies_all_risk') == 1 %}checked{% endif %}
+        onclick="toggleRiskFields()"
+      >
+      <label class="risk-check-label" for="denies_all_risk">
+        Client currently denies all risk
+      </label>
+    </div>
+
+    <!-- Collapsible risk fields -->
+    <div id="risk-fields" {% if form.denies_all_risk == 1 %}style="display:none;"{% endif %}>
+
+      {% set risk_type_fields = {
+        'suicide_level': ['None','Passive ideation','Ideation without intent or plan','Intent','Plan'],
+        'homicide_level': ['None','Ideation without intent or plan','Intent','Plan','Identified victim'],
+        'selfharm_level': ['None','Urges without intent or plan','Intent','Recent self-harm behaviors','With repetitive compulsions']
+      } %}
+
+      {% for field, options in risk_type_fields %}
+        <label class="form-label">{{ field|replace({'_':' '})|capitalize }}</label>
+        <div class="checkbox-group">
+          {% set field_values = attribute(form, field) is iterable ? attribute(form, field) : [] %}
+          {% for opt in options %}
+            <label class="form-check-label" for="{{ field }}_{{ loop.index }}">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                name="{{ field }}[]"
+                value="{{ opt }}"
+                id="{{ field }}_{{ loop.index }}"
+                {% if opt in field_values %}checked{% endif %}>
+              {{ opt }}
+            </label>
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <label class="form-label">Additional information</label>
+      <textarea name="risk_info">{{ attribute(form, 'risk_info') }}</textarea>
+    </div>
+
+    <label class="form-label">Overall risk level</label>
+    <div class="selectors">
+      <select name="overall_risk">
+        {% set overall_options = ['None','Low','Moderate','High'] %}
+        {% for opt in overall_options %}
+          <option value="{{ opt }}" {% if attribute(form, 'overall_risk') == opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <script>
+      function toggleRiskFields() {
+        const checkbox = document.getElementById('denies_all_risk');
+        const fields = document.getElementById('risk-fields');
+        const riskGroups = ['suicide_level', 'homicide_level', 'selfharm_level'];
+
+        if (checkbox.checked) {
+          // Hide fields
+          fields.style.display = 'none';
+
+          // Set each risk field to "None reported"
+          riskGroups.forEach(field => {
+            const checkboxes = document.querySelectorAll('input[name="${field}[]"]');
+            checkboxes.forEach(cb => {
+              cb.checked = (cb.value === 'None reported');
+            });
+          });
+        } else {
+          // Render the fields
+          fields.style.display = 'block';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', toggleRiskFields);
+    </script>
+
+    <!-- ======================== -->
+    <!-- Assessment Block -->
+    <!-- ======================== -->
+    <h3 class="form-section-header">Assessment</h3>
+
+    {% set assessment_fields = [
+      'clinical_summary','diagnostic_support','assessment_symptoms','medical_necessity','therapeutic_interventions'
+    ] %}
+
+    {% for field in assessment_fields %}
+      {% if field == 'assessment_symptoms' %}
+        <label class="form-label">Overall symptom level</label>
+        <div class="selectors">
+          <select name="assessment_symptoms">
+            {% for opt in ['Escalated','Maintained','Improved'] %}
+              <option value="{{ opt }}" {% if attribute(form, 'assessment_symptoms') == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      {% else %}
+        <label class="form-label">{{ field|replace({'_':' '})|capitalize }}</label>
+        <textarea name="{{ field }}">{{ attribute(form, field) }}</textarea>
+      {% endif %}
+    {% endfor %}
+
+    <!-- ======================== -->
+    <!-- Psychotherapy Towards Goals Block -->
+    <!-- ======================== -->
+    <h3 class="form-section-header">Psychotherapy Towards Goals</h3>
+
+    <!-- Treatment Goals -->
+    <label class="form-label">Description of Treatment Goals</label>
+    <textarea name="treatment_goals">{{ attribute(form, 'treatment_goals') }}</textarea>
+
+    <!-- Overall Psychotherapy Towards Goals -->
+    <label class="form-label">Overall Psychotherapy Towards Goals</label>
+    <div class="selectors">
+      <select name="goals_progress">
+        {% set goals_options = ['Regressed','No change', 'Progressed', 'Goals achieved'] %}
+        {% for opt in goals_options %}
+          <option value="{{ opt }}" {% if attribute(form, 'goals_progress') == opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Barriers to treatment goals -->
+    <label class="form-label">Barriers to treatment</label>
+    <div class="checkbox-group">
+      {% set barriers_options = ['Severe mental health symptoms', 'Lack of motivation', 'Difficulty with emotion regulation', 'External stressors/situational factors', 'Limited social support', 'Lack of insight into condition', 'Limited access to needed services', 'Co-occurring medical issues', 'Cultural and/or linguistic barriers', 'Substance use'] %}
+      {% for opt in barriers_options %}
+        <label class="form-check-label">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            name="barriers[]"
+            value="{{ opt }}"
+            {% if opt in attribute(form, 'barriers') %}checked{% endif %}
+          >
+          {{ opt }}
+        </label>
+       {% endfor %}
+    </div>
+
+    <!-- ======================== -->
+    <!-- Plan Block -->
+    <!-- ======================== -->
+    <h3 class="form-section-header">Plan</h3>
+
+    {% set plan_fields = [
+      ['next_steps','Next Steps'],
+      ['next_appt_date','Date of Next Appointment'],
+      ['next_appt_time','Time of Next Appointment']
+    ] %}
+
+    {% for item in plan_fields %}
+      {% set field = item[0] %}
+      {% set label = item[1] %}
+      <label class="form-label">{{ label }}</label>
+      {% if field == 'next_steps' %}
+          <textarea name="{{ field }}">{{ attribute(form, field) }}</textarea>
+      {% elseif field == 'next_appt_date' %}
+        <div class="selectors">
+          <input type="date" name="{{ field }}" value="{{ attribute(form, field) }}">
+        </div>
+      {% else %}
+        <div class="selectors">
+          <input type="time" name="{{ field }}" value="{{ attribute(form, field) }}">
+        </div>
+      {% endif %}
+    {% endfor %}
+
+
+    <!-- SAVE BUTTON -->
+    <button type="submit" name="submit">{{ 'Save' }}</button>
+
+
+    <!-- ======================= -->
+    <!-- Hidden fields -->
+    <!-- ======================= -->
+    <input type="hidden" name="id" value="{{ form.id|default('') }}">
+    <input type="hidden" name="pid" value="{{ pid }}">
+    <input type="hidden" name="encounter" value="{{ encounter }}">
+    <input type="hidden" name="process" value="true" />
+
+  </form>
+</div>
