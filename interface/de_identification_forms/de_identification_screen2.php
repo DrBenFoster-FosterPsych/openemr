@@ -36,11 +36,7 @@ de_identification_screen1.php  */
 $begin_date = $_POST["begin_date"];
 $end_date = $_POST["end_date"];
 
-if ($_POST["unstructured"]) {
-    $include_unstructured = 1;
-} else {
-    $include_unstructured = 0;
-}
+$include_unstructured = $_POST["unstructured"] ? 1 : 0;
 
 if ($_POST["all"]) {
     $include_tables = "all";
@@ -145,7 +141,7 @@ if ($deIdentificationStatus == 0) {
 
     try {
         //call procedure - execute in background
-        $sh_cmd = './de_identification_procedure.sh ' . escapeshellarg($sqlconf["host"]) . ' ' . escapeshellarg($sqlconf["login"]) . ' ' . escapeshellarg($sqlconf["pass"]) . ' ' . escapeshellarg($sqlconf["dbase"]) . ' &';
+        $sh_cmd = './de_identification_procedure.sh ' . escapeshellarg((string) $sqlconf["host"]) . ' ' . escapeshellarg((string) $sqlconf["login"]) . ' ' . escapeshellarg((string) $sqlconf["pass"]) . ' ' . escapeshellarg((string) $sqlconf["dbase"]) . ' &';
         system($sh_cmd);
 
 
@@ -257,7 +253,7 @@ if ($deIdentificationStatus == 0) {
                 }
             }
         }
-    } catch (Exception $e) {
+    } catch (Exception) {
         //error status
         $query = "update de_identification_status set status = 3";
         $res = sqlStatement($query);
@@ -275,7 +271,7 @@ if ($deIdentificationStatus == 0) {
     if (file_exists($filename)) {
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename=' . basename($filename));
+        header('Content-Disposition: attachment; filename=' . basename((string) $filename));
         header('Content-Transfer-Encoding: binary');
         header('Content-Type: application/vnd.ms-excel;');                 // This should work for IE & Opera
         header("Content-type: application/x-msexcel");                    // This should work for the rest

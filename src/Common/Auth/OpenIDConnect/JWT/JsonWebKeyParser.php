@@ -83,7 +83,7 @@ class JsonWebKeyParser
                 $result['active'] = false;
                 $result['status'] = 'failed_verification';
             }
-        } catch (Exception $exception) {
+        } catch (Exception) {
             $result['active'] = false;
             $result['status'] = 'invalid_signature';
         }
@@ -104,12 +104,8 @@ class JsonWebKeyParser
             throw new \InvalidArgumentException("Token cannot be empty");
         }
         // determine if access or refresh.
-        $access_parts = explode(".", $rawToken);
-        if (count($access_parts) === 3) {
-            $token_hint = 'access_token';
-        } else {
-            $token_hint = 'refresh_token';
-        }
+        $access_parts = explode(".", (string) $rawToken);
+        $token_hint = count($access_parts) === 3 ? 'access_token' : 'refresh_token';
         return $token_hint;
     }
 }

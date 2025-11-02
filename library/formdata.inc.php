@@ -106,7 +106,7 @@ function escape_sql_column_name($s, $tables, $long = false, $throwException = fa
     if (is_array($s)) {
         $multiple_columns = [];
         foreach ($s as $column) {
-            $multiple_columns[] = escape_sql_column_name(trim($column), $tables);
+            $multiple_columns[] = escape_sql_column_name(trim((string) $column), $tables);
         }
         return implode(", ", $multiple_columns);
     }
@@ -132,11 +132,7 @@ function escape_sql_column_name($s, $tables, $long = false, $throwException = fa
     foreach ($tables_escaped as $table_escaped) {
         $res = sqlStatementNoLog("SHOW COLUMNS FROM " . $table_escaped);
         while ($row = sqlFetchArray($res)) {
-            if ($long) {
-                $columns_options[] = $table_escaped . "." . $row['Field'];
-            } else {
-                $columns_options[] = $row['Field'];
-            }
+            $columns_options[] = $long ? $table_escaped . "." . $row['Field'] : $row['Field'];
         }
     }
 

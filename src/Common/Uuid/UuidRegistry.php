@@ -49,6 +49,7 @@ class UuidRegistry
         'form_vitals' => ['table_name' => 'form_vitals'],
         'form_observation' => ['table_name' => 'form_observation'],
         'history_data' => ['table_name' => 'history_data'],
+        'issue_encounter' => ['table_name' => 'issue_encounter'],
         'immunizations' => ['table_name' => 'immunizations'],
         'insurance_companies' => ['table_name' => 'insurance_companies'],
         'insurance_data' => ['table_name' => 'insurance_data'],
@@ -82,24 +83,12 @@ class UuidRegistry
     public function __construct($associations = [])
     {
         $this->table_name = $associations['table_name'] ?? '';
-        if (!empty($this->table_name)) {
-            $this->table_id = $associations['table_id'] ?? 'id';
-        } else {
-            $this->table_id = '';
-        }
+        $this->table_id = !empty($this->table_name) ? $associations['table_id'] ?? 'id' : '';
         $this->table_vertical = $associations['table_vertical'] ?? false;
         $this->disable_tracker = $associations['disable_tracker'] ?? false;
         $this->couchdb = $associations['couchdb'] ?? '';
-        if (!empty($associations['document_drive']) && $associations['document_drive'] === true) {
-            $this->document_drive = 1;
-        } else {
-            $this->document_drive = 0;
-        }
-        if (!empty($associations['mapped']) && $associations['mapped'] === true) {
-            $this->mapped = 1;
-        } else {
-            $this->mapped = 0;
-        }
+        $this->document_drive = !empty($associations['document_drive']) && $associations['document_drive'] === true ? 1 : 0;
+        $this->mapped = !empty($associations['mapped']) && $associations['mapped'] === true ? 1 : 0;
     }
 
     /**
@@ -148,7 +137,7 @@ class UuidRegistry
         self::appendPopulateLog('uuid_registry', $mappedRegistryUuidCounter, $logEntryComment);
 
         if (!empty($logEntryComment)) {
-            $logEntryComment = rtrim($logEntryComment, ', ');
+            $logEntryComment = rtrim((string) $logEntryComment, ', ');
         }
 
         // log it

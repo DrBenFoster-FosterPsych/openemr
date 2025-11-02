@@ -156,11 +156,7 @@ class Mime_Types
                     $ext,
                     $type
             ];
-            if (isset($method)) {
-                $res = $callback [0]->$method($this, $ext_type, $param);
-            } else {
-                $res = $callback($this, $ext_type, $param);
-            }
+            $res = isset($method) ? $callback [0]->$method($this, $ext_type, $param) : $callback($this, $ext_type, $param);
 
             if (! $res) {
                 return;
@@ -320,7 +316,7 @@ class Mime_Types
 
             // loop through extensions
         if (! is_array($exts)) {
-            $exts = explode(' ', $exts);
+            $exts = explode(' ', (string) $exts);
         }
 
         foreach ($exts as $ext) {
@@ -411,11 +407,11 @@ class Mime_Types
     function remove_extension($exts)
     {
         if (! is_array($exts)) {
-            $exts = explode(' ', $exts);
+            $exts = explode(' ', (string) $exts);
         }
 
         foreach ($exts as $ext) {
-            $ext = strtolower(trim($ext));
+            $ext = strtolower(trim((string) $ext));
             if (isset($this->mime_types [$ext])) {
                 unset($this->mime_types [$ext]);
             }
@@ -459,10 +455,7 @@ class Mime_Types
             $type_info ['type'] = substr($type, 0, $slash_pos);
         }
 
-        $this->scan([
-                &$this,
-                '_remove_type_callback'
-        ], $type_info);
+        $this->scan($this->_remove_type_callback(...), $type_info);
     }
 
     /**
@@ -524,7 +517,7 @@ class Mime_Types
         $matched = false;
         [$ext, $type] = $ext_type;
         if ($type_info ['wildcard']) {
-            if (substr($type, 0, strpos($type, '/')) == $type_info ['type']) {
+            if (substr((string) $type, 0, strpos((string) $type, '/')) == $type_info ['type']) {
                 $matched = true;
             }
         } elseif ($type == $type_info ['type']) {

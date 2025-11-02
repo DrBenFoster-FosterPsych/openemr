@@ -35,7 +35,7 @@ class eRxSOAP
     {
         $encoded = json_encode($array);
         $fixed = $xmltoarray->fix_html_entities($encoded);
-        return json_decode($fixed, true);
+        return json_decode((string) $fixed, true);
     }
 
     /**
@@ -285,7 +285,7 @@ class eRxSOAP
             return true;
         }
 
-        return strtotime('-' . $ttl . ' seconds') >= strtotime($soap);
+        return strtotime('-' . $ttl . ' seconds') >= strtotime((string) $soap);
     }
 
     /**
@@ -312,11 +312,7 @@ class eRxSOAP
                 $this->getPatientId()
             );
 
-        if (is_array($status)) {
-            $return = in_array($currentStatus, $status);
-        } else {
-            $return = ($currentStatus == $status);
-        }
+        $return = is_array($status) ? in_array($currentStatus, $status) : $currentStatus == $status;
 
         return $return;
     }
@@ -636,32 +632,20 @@ class eRxSOAP
         $store->updatePrescriptionsActiveByPatientId($this->getPatientId());
         if (is_array($medArray)) {
             foreach ($medArray as $med) {
-                if ($med['DosageForm']) {
-                    $optionIdDosageForm = $this->insertMissingListOptions(
-                        'drug_form',
-                        $med['DosageForm']
-                    );
-                } else {
-                    $optionIdDosageForm = null;
-                }
+                $optionIdDosageForm = $med['DosageForm'] ? $this->insertMissingListOptions(
+                    'drug_form',
+                    $med['DosageForm']
+                ) : null;
 
-                if ($med['Route']) {
-                    $optionIdRoute = $this->insertMissingListOptions(
-                        'drug_route',
-                        $med['Route']
-                    );
-                } else {
-                    $optionIdRoute = null;
-                }
+                $optionIdRoute = $med['Route'] ? $this->insertMissingListOptions(
+                    'drug_route',
+                    $med['Route']
+                ) : null;
 
-                if ($med['StrengthUOM']) {
-                    $optionIdStrengthUOM = $this->insertMissingListOptions(
-                        'drug_units',
-                        $med['StrengthUOM']
-                    );
-                } else {
-                    $optionIdStrengthUOM = null;
-                }
+                $optionIdStrengthUOM = $med['StrengthUOM'] ? $this->insertMissingListOptions(
+                    'drug_units',
+                    $med['StrengthUOM']
+                ) : null;
 
                 if ($med['DosageFrequencyDescription']) {
                     $optionIdFrequencyDescription = $this->insertMissingListOptions(

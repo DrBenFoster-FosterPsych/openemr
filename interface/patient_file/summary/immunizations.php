@@ -61,32 +61,32 @@ if (isset($_GET['mode'])) {
             reason_description = ?,
             ordering_provider = ?";
         $sqlBindArray = [
-            trim($_GET['id']),
+            trim((string) $_GET['id']),
             UuidRegistry::isValidStringUUID($_GET['uuid']) ? UuidRegistry::uuidToBytes($_GET['uuid']) : null,
-            trim($_GET['administered_date']), trim($_GET['administered_date']),
+            trim((string) $_GET['administered_date']), trim((string) $_GET['administered_date']),
             trim($_GET['form_immunization_id'] ?? ''),
-            trim($_GET['cvx_code']),
-            trim($_GET['manufacturer']),
+            trim((string) $_GET['cvx_code']),
+            trim((string) $_GET['manufacturer']),
             trim($_GET['lot_number'] ?? ''),
-            trim($_GET['administered_by_id']), trim($_GET['administered_by_id']),
-            trim($_GET['administered_by']), trim($_GET['administered_by']),
-            trim($_GET['education_date']), trim($_GET['education_date']),
-            trim($_GET['vis_date']), trim($_GET['vis_date']),
-            trim($_GET['note']),
+            trim((string) $_GET['administered_by_id']), trim((string) $_GET['administered_by_id']),
+            trim((string) $_GET['administered_by']), trim((string) $_GET['administered_by']),
+            trim((string) $_GET['education_date']), trim((string) $_GET['education_date']),
+            trim((string) $_GET['vis_date']), trim((string) $_GET['vis_date']),
+            trim((string) $_GET['note']),
             $pid,
             $_SESSION['authUserID'],
             $_SESSION['authUserID'],
-            trim($_GET['immuniz_amt_adminstrd']),
-            trim($_GET['form_drug_units']),
-            trim($_GET['immuniz_exp_date']), trim($_GET['immuniz_exp_date']),
-            trim($_GET['immuniz_route']),
-            trim($_GET['immuniz_admin_ste']),
-            trim($_GET['immuniz_completion_status']),
-            trim($_GET['immunization_informationsource']),
-            trim($_GET['immunization_refusal_reason']),
-            trim($_GET['reason_code']),
+            trim((string) $_GET['immuniz_amt_adminstrd']),
+            trim((string) $_GET['form_drug_units']),
+            trim((string) $_GET['immuniz_exp_date']), trim((string) $_GET['immuniz_exp_date']),
+            trim((string) $_GET['immuniz_route']),
+            trim((string) $_GET['immuniz_admin_ste']),
+            trim((string) $_GET['immuniz_completion_status']),
+            trim((string) $_GET['immunization_informationsource']),
+            trim((string) $_GET['immunization_refusal_reason']),
+            trim((string) $_GET['reason_code']),
             trim($_GET['reason_description'] ?? ''),
-            trim($_GET['ordered_by_id'])
+            trim((string) $_GET['ordered_by_id'])
         ];
         $newid = sqlInsert($sql, $sqlBindArray);
         $administered_date = date('Y-m-d H:i');
@@ -182,11 +182,7 @@ if ($GLOBALS['use_custom_immun_list']) {
 } else {
     if (!empty($_GET['mode']) && ($_GET['mode'] == "edit")) {
         //depends on if a cvx code is enterer already
-        if (empty($cvx_code)) {
-            $useCVX = false;
-        } else {
-            $useCVX = true;
-        }
+        $useCVX = empty($cvx_code) ? false : true;
     } else { // $_GET['mode'] == "add"
         $useCVX = true;
     }
@@ -551,11 +547,7 @@ tr.selected {
                                         <div class="form-row" id="or_tr_<?php echo attr(($key + 1)); ?>">
                                             <?php
                                             if ($id == 0) {
-                                                if ($key == 0) {
-                                                    $style = 'display: table-cell;width:765px !important';
-                                                } else {
-                                                    $style = 'display: none;width:765px !important';
-                                                }
+                                                $style = $key == 0 ? 'display: table-cell;width:765px !important' : 'display: none;width:765px !important';
                                             } else {
                                                 $style = 'display : table-cell;width:765px !important';
                                             }
@@ -757,11 +749,7 @@ tr.selected {
                         while ($row = sqlFetchArray($result)) {
                             $isError = $row['added_erroneously'];
 
-                            if ($isError) {
-                                $tr_title = 'title="' . xla("Entered in Error") . '"';
-                            } else {
-                                $tr_title = "";
-                            }
+                            $tr_title = $isError ? 'title="' . xla("Entered in Error") . '"' : "";
 
                             if (!empty($id) && ($row["id"] == $id)) {
                                 echo "<tr " . $tr_title . " class='immrow text selected' id='" . attr($row["id"]) . "'>";
@@ -814,11 +802,7 @@ tr.selected {
                             echo "<td>" . $del_tag_open . text($row["note"]) . $del_tag_close . "</td>";
                             echo "<td>" . $del_tag_open . generate_display_field(['data_type' => '1','list_id' => 'Immunization_Completion_Status'], $row['completion_status']) . $del_tag_close . "</td>";
 
-                            if ($isError) {
-                                $checkbox = "checked";
-                            } else {
-                                $checkbox = "";
-                            }
+                            $checkbox = $isError ? "checked" : "";
 
                                 echo "<td><input type='checkbox' class='error' id='" . attr($row["id"]) . "' value='" . xlt('Error') . "' " . $checkbox . " /></td>";
 

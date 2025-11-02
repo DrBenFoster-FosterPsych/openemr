@@ -65,14 +65,14 @@ class ClientRepository implements ClientRepositoryInterface
             $redirects = implode("|", $redirects);
         }
         $logout_redirect_uris = $info['post_logout_redirect_uris'] ?? null;
-        $info['client_secret'] = $info['client_secret'] ?? null; // just to be sure empty is null;
+        $info['client_secret'] ??= null; // just to be sure empty is null;
         // set our list of default scopes for the registration if our scope is empty
         // This is how a client can set if they support SMART apps and other stuff by passing in the 'launch'
         // scope to the dynamic client registration.
         // per RFC 7591 @see https://tools.ietf.org/html/rfc7591#section-2
         // TODO: adunsulag do we need to reject the registration if there are certain scopes here we do not support
         // TODO: adunsulag should we check these scopes against our '$this->supportedScopes'?
-        $info['scope'] = $info['scope'] ?? 'openid email phone address api:oemr api:fhir api:port';
+        $info['scope'] ??= 'openid email phone address api:oemr api:fhir api:port';
 
         $scopes = explode(" ", $info['scope']);
         $scopeRepo = new ScopeRepository();
@@ -251,7 +251,7 @@ class ClientRepository implements ClientRepositoryInterface
         $pipedValues = ['contacts', 'redirect_uri', 'request_uri', 'post_logout_redirect_uris', 'grant_types', 'response_types', 'default_acr_values'];
         foreach ($pipedValues as $value) {
             if (!empty($client_record[$value])) {
-                $client_record[$value] = explode('|', $client_record[$value]);
+                $client_record[$value] = explode('|', (string) $client_record[$value]);
             }
         }
         $client = new ClientEntity();

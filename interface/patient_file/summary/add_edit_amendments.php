@@ -103,11 +103,11 @@ if (isset($_POST['mode'])) {
         $created_time
     ];
     sqlStatement($query, $sqlBindArray);
-    header("Location:add_edit_amendments.php?id=" . urlencode($amendment_id));
+    header("Location:add_edit_amendments.php?id=" . urlencode((string) $amendment_id));
     exit;
 }
 
-$amendment_id = $amendment_id ?? ($_REQUEST['id'] ?? '');
+$amendment_id ??= $_REQUEST['id'] ?? '';
 if (!empty($amendment_id)) {
     $query = "SELECT * FROM amendments WHERE amendment_id = ? ";
     $resultSet = sqlQuery($query, [$amendment_id]);
@@ -250,7 +250,7 @@ $(function () {
                 <?php
                 if (sqlNumRows($resultSet)) {
                     while ($row = sqlFetchArray($resultSet)) {
-                        $created_date = date('Y-m-d', strtotime($row['created_time']));
+                        $created_date = date('Y-m-d', strtotime((string) $row['created_time']));
                         echo "<tr>";
                         $userName = $row['lname'] . ", " . $row['fname'];
                         echo "<td>" . text(oeFormatShortDate($created_date)) . "</td>";

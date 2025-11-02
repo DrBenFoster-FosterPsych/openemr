@@ -51,11 +51,7 @@ $alertmsg = '';
 //Gets validation rules from Page Validation list.
 //Note that for technical reasons, we are bypassing the standard validateUsingPageRules() call.
 $collectthis = collectValidationPageRules("/interface/usergroup/usergroup_admin_add.php");
-if (empty($collectthis)) {
-    $collectthis = "undefined";
-} else {
-    $collectthis = json_sanitize($collectthis["new_user"]["rules"]);
-}
+$collectthis = empty($collectthis) ? "undefined" : json_sanitize($collectthis["new_user"]["rules"]);
 ?>
 <script>
 
@@ -644,7 +640,7 @@ if (empty($GLOBALS['disable_non_default_groups'])) {
 
     foreach ($grouplist as $groupname => $list) {
         print "<span class='font-weight-bold'>" . text($groupname) . "</span><br />\n<span class='text'>" .
-        text(substr($list, 0, strlen($list) - 2)) . "</span><br />\n";
+        text(substr((string) $list, 0, strlen((string) $list) - 2)) . "</span><br />\n";
     }
 }
 ?>

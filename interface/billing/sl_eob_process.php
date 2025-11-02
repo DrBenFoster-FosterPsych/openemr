@@ -41,7 +41,7 @@ $InsertionId; // last inserted ID of
 
 function parse_date($date)
 {
-    $date = substr(trim($date), 0, 10);
+    $date = substr(trim((string) $date), 0, 10);
     if (preg_match('/^(\d\d\d\d)\D*(\d\d)\D*(\d\d)$/', $date, $matches)) {
         return $matches[1] . '-' . $matches[2] . '-' . $matches[3];
     }
@@ -126,7 +126,7 @@ function writeOldDetail(&$prev, $ptname, $invnumber, $dos, $code, $bgcolor): voi
     // $prev['total'] = 0.00; // to accumulate total charges
     ksort($prev['dtl']);
     foreach ($prev['dtl'] as $dkey => $ddata) {
-        $ddate = substr($dkey, 0, 10);
+        $ddate = substr((string) $dkey, 0, 10);
         $description = ($ddata['src'] ?? '') . ($ddata['rsn'] ?? '');
         if ($ddate == '          ') { // this is the service item
             $ddate = $dos;
@@ -172,11 +172,7 @@ function era_callback_check(&$out): void
         $StringToEcho .= "<tbody>";
         $WarningFlag = false;
         for ($check_count = 1; $check_count <= $out['check_count']; $check_count++) {
-            if ($check_count % 2 == 1) {
-                $bgcolor = '#ddddff';
-            } else {
-                $bgcolor = '#ffdddd';
-            }
+            $bgcolor = $check_count % 2 == 1 ? '#ddddff' : '#ffdddd';
 
             $rs = sqlQ("select reference from ar_session where reference=?", [$out['check_number' . $check_count]]);
 
@@ -342,7 +338,7 @@ function era_callback(&$out): void
         }
 
         if ($out['warnings']) {
-            writeMessageLine($bgcolor, 'infdetail', rtrim($out['warnings']), true);
+            writeMessageLine($bgcolor, 'infdetail', rtrim((string) $out['warnings']), true);
         }
 
         // Simplify some claim attributes for cleaner code.
@@ -362,7 +358,7 @@ function era_callback(&$out): void
         // create array of cpts and mods for complex matching
         $codes_arr_keys = array_keys($codes);
         foreach ($codes_arr_keys as $value) {
-            $tmp = explode(":", $value);
+            $tmp = explode(":", (string) $value);
             $count = count($tmp) - 1;
             $cpt = $tmp[0];
             $cpts[] = $cpt;

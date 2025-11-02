@@ -132,13 +132,13 @@ EOF;
             return $output->GetOutput();
         }
         $tmp = $constantid[$i];
-        if (strpos(trim($tmp), ' ')) {
+        if (strpos(trim((string) $tmp), ' ')) {
             $output->Text(postcalendar_admin_categories($msg, "Category Identifiers must be one word!"));
             return $output->GetOutput();
         }
         $tmp = $color[$i];
-        if (strlen($tmp) != 7 || $tmp[0] != "#") {
-            $e = $tmp . " size " . strlen($tmp) . " at 0 " . $tmp[0];
+        if (strlen((string) $tmp) != 7 || $tmp[0] != "#") {
+            $e = $tmp . " size " . strlen((string) $tmp) . " at 0 " . $tmp[0];
             $output->Text(postcalendar_admin_categories($msg, "You entered an invalid color(USE Pick) $e!"));
             return $output->GetOutput();
         }
@@ -201,7 +201,7 @@ EOF;
             $output->Text(postcalendar_admin_categories($msg ?? '', "Category Identifiers must contain a value!"));
             return $output->GetOutput();
         }
-        if (strpos(trim($newconstantid), ' ')) {
+        if (strpos(trim((string) $newconstantid), ' ')) {
             $output->Text(postcalendar_admin_categories($msg, "Category Identifiers must be one word!"));
             return $output->GetOutput();
         }
@@ -792,34 +792,18 @@ function postcalendar_admin_testSystem()
     $__SERVER =& $_SERVER;
     $__ENV    =& $_ENV;
 
-    if (defined('_PN_VERSION_NUM')) {
-        $pnVersion = _PN_VERSION_NUM;
-    } else {
-        $pnVersion = pnConfigGetVar('Version_Num');
-    }
+    $pnVersion = defined('_PN_VERSION_NUM') ? _PN_VERSION_NUM : pnConfigGetVar('Version_Num');
 
     array_push($infos, ['CMS Version', $pnVersion]);
     array_push($infos, ['Sitename', pnConfigGetVar('sitename')]);
     array_push($infos, ['url', pnGetBaseURL()]);
     array_push($infos, ['PHP Version', phpversion()]);
-    if ((bool) ini_get('safe_mode')) {
-        $safe_mode = "On";
-    } else {
-        $safe_mode = "Off";
-    }
+    $safe_mode = (bool) ini_get('safe_mode') ? "On" : "Off";
     array_push($infos, ['PHP safe_mode', $safe_mode]);
-    if ((bool) ini_get('safe_mode_gid')) {
-        $safe_mode_gid = "On";
-    } else {
-        $safe_mode_gid = "Off";
-    }
+    $safe_mode_gid = (bool) ini_get('safe_mode_gid') ? "On" : "Off";
     array_push($infos, ['PHP safe_mode_gid', $safe_mode_gid]);
     $base_dir = ini_get('open_basedir');
-    if (!empty($base_dir)) {
-        $open_basedir = "$base_dir";
-    } else {
-        $open_basedir = "NULL";
-    }
+    $open_basedir = !empty($base_dir) ? "$base_dir" : "NULL";
     array_push($infos, ['PHP open_basedir', $open_basedir]);
     array_push($infos, ['SAPI', php_sapi_name()]);
     array_push($infos, ['OS', php_uname()]);
